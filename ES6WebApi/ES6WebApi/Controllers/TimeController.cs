@@ -24,7 +24,6 @@ namespace ES6WebApi.Controllers
         {
             return Ok(new ServerTimeResponse
             {
-
                 ServerTime = _dateTimeProvider.UtcNow
             });
         }
