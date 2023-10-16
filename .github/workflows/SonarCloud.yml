@@ -46,5 +46,5 @@ jobs:
         run: |
           dotnet test ES6WebApi/ES6WebApi.tests/ES6WebApi.tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"UA-2023-ES6_ES-WebApi" /o:"ua-2023-es6" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="ES6WebApi.tests\coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
-          dotnet build ES6WebApi\ES6WebApi.csproj
+          dotnet build ES6WebApi\Es6WebApi\ES6WebApi.csproj
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
