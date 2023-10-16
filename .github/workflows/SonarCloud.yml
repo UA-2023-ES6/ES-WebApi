@@ -5,7 +5,7 @@ on:
       - main
   push:
     branches:
-      - development
+      - main
 jobs:
   build:
     name: Build and analyze
@@ -36,7 +36,6 @@ jobs:
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          cd ES6WebApi
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
       - name: Build and analyze
@@ -45,7 +44,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          cd ES6WebApi
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"UA-2023-ES6_ES-WebApi" /o:"ua-2023-es6" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build
+          dotnet test ES6WebApi.tests/ES6WebApi.tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"UA-2023-ES6_ES-WebApi" /o:"ua-2023-es6" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="ES6WebApi.tests\coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs"
+          dotnet build ES6WebApi\ES6WebApi.csproj
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
