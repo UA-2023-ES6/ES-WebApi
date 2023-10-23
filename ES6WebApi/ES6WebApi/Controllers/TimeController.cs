@@ -13,8 +13,6 @@ namespace ES6WebApi.Controllers
     {
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        /// <summary>Gets the server time.</summary>
-        /// <returns>The server time.</returns>
         public TimeController(IDateTimeProvider dateTimeProvider)
         {
             _dateTimeProvider = dateTimeProvider;
