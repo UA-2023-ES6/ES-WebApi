@@ -1,5 +1,4 @@
-using ES6WebApi.Providers;
-using ES6WebApi.Providers.Interfaces;
+using ES6WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +8,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+
+builder.Services.AddServices(builder.Configuration);
+
 builder.Services.AddCors();
 
 var app = builder.Build();
