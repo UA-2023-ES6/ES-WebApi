@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCampus.Application.Providers;
-using OneCampus.Controllers;
+using OneCampus.Api.Controllers;
+using OneCampus.Domain.Providers;
 using OneCampus.Models.Responses;
 
 namespace OneCampus.Tests.ComponentTests.Controllers;

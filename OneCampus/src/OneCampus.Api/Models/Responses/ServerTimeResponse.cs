@@ -1,7 +1,6 @@
-﻿namespace OneCampus.Models.Responses
+﻿namespace OneCampus.Models.Responses;
+
+public class ServerTimeResponse
 {
-    public class ServerTimeResponse
-    {
-        public DateTime ServerTime { get; set; }
-    }
+    public DateTime ServerTime { get; set; }
 }

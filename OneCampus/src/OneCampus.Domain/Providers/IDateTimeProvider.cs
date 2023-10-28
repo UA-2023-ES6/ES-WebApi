@@ -1,4 +1,4 @@
-﻿namespace OneCampus.Application.Providers;
+﻿namespace OneCampus.Domain.Providers;
 
 public interface IDateTimeProvider
 {

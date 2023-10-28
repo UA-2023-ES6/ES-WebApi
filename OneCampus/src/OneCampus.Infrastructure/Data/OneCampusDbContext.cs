@@ -11,7 +11,6 @@ public class OneCampusDbContext : DbContext
     public DbSet<UserRoleInstitution> UserRoleInstitution { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<Event> Events { get; set; }
-    public DbSet<Class> Classes { get; set; }
     public DbSet<Message> Messages { get; set; }
 
     public OneCampusDbContext()
@@ -20,5 +19,16 @@ public class OneCampusDbContext : DbContext
 
     public OneCampusDbContext(DbContextOptions<OneCampusDbContext> options) : base(options)
     {
+        Database.EnsureCreated();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Institution>()
+            .HasOne<Group>(g => g.Group)
+            .WithOne(g => g.Institution)
+            .HasForeignKey<Institution>(i => i.GroupId);
+
+        base.OnModelCreating(modelBuilder);
     }
 }

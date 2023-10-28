@@ -34,47 +34,10 @@ namespace OneCampus.Infrastructure.Migrations
                     b.ToTable("GroupUser");
                 });
 
-            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Class", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("InstitutionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstitutionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Classes");
-                });
-
             modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClassId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
@@ -89,10 +52,7 @@ namespace OneCampus.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("InstitutionId")
+                    b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -107,11 +67,7 @@ namespace OneCampus.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
-
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("InstitutionId");
 
                     b.ToTable("Events");
                 });
@@ -120,9 +76,6 @@ namespace OneCampus.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClassId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
@@ -135,12 +88,15 @@ namespace OneCampus.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("Groups");
                 });
@@ -157,6 +113,9 @@ namespace OneCampus.Infrastructure.Migrations
                     b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -165,6 +124,9 @@ namespace OneCampus.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId")
+                        .IsUnique();
 
                     b.ToTable("Institutions");
                 });
@@ -175,9 +137,6 @@ namespace OneCampus.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("ClassId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -185,10 +144,7 @@ namespace OneCampus.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("InstitutionId")
+                    b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -196,11 +152,7 @@ namespace OneCampus.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
-
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("InstitutionId");
 
                     b.HasIndex("UserId");
 
@@ -298,66 +250,44 @@ namespace OneCampus.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Class", b =>
+            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Event", b =>
                 {
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Institution", "Institution")
-                        .WithMany("Classes")
-                        .HasForeignKey("InstitutionId")
+                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Group", "Group")
+                        .WithMany("Events")
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.User", null)
-                        .WithMany("Classes")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Institution");
-                });
-
-            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Event", b =>
-                {
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Class", "Class")
-                        .WithMany("Events")
-                        .HasForeignKey("ClassId");
-
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Group", "Group")
-                        .WithMany("Events")
-                        .HasForeignKey("GroupId");
-
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Institution", "Institution")
-                        .WithMany("Events")
-                        .HasForeignKey("InstitutionId");
-
-                    b.Navigation("Class");
-
                     b.Navigation("Group");
-
-                    b.Navigation("Institution");
                 });
 
             modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Group", b =>
                 {
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Class", "Class")
+                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Group", "Parent")
                         .WithMany("Groups")
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Institution", b =>
+                {
+                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Group", "Group")
+                        .WithOne("Institution")
+                        .HasForeignKey("OneCampus.Infrastructure.Data.Entities.Institution", "GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Class");
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Message", b =>
                 {
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Class", "Class")
-                        .WithMany("Messages")
-                        .HasForeignKey("ClassId");
-
                     b.HasOne("OneCampus.Infrastructure.Data.Entities.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
-
-                    b.HasOne("OneCampus.Infrastructure.Data.Entities.Institution", "Institution")
                         .WithMany("Messages")
-                        .HasForeignKey("InstitutionId");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("OneCampus.Infrastructure.Data.Entities.User", "User")
                         .WithMany()
@@ -365,11 +295,7 @@ namespace OneCampus.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Class");
-
                     b.Navigation("Group");
-
-                    b.Navigation("Institution");
 
                     b.Navigation("User");
                 });
@@ -401,28 +327,19 @@ namespace OneCampus.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Class", b =>
+            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Group", b =>
                 {
                     b.Navigation("Events");
 
                     b.Navigation("Groups");
 
-                    b.Navigation("Messages");
-                });
+                    b.Navigation("Institution");
 
-            modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Group", b =>
-                {
-                    b.Navigation("Events");
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.Institution", b =>
                 {
-                    b.Navigation("Classes");
-
-                    b.Navigation("Events");
-
-                    b.Navigation("Messages");
-
                     b.Navigation("UserRoleInstitution");
                 });
 
@@ -433,8 +350,6 @@ namespace OneCampus.Infrastructure.Migrations
 
             modelBuilder.Entity("OneCampus.Infrastructure.Data.Entities.User", b =>
                 {
-                    b.Navigation("Classes");
-
                     b.Navigation("UserRoleInstitution");
                 });
 #pragma warning restore 612, 618

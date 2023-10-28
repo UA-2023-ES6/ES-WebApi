@@ -12,5 +12,4 @@ public class UserRoleInstitution
     public virtual User User { get; set; } = null!;
     public virtual Role Role { get; set; } = null!;
     public virtual Institution Institution { get; set; } = null!;
-
 }
