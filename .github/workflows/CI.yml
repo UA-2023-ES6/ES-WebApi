@@ -1,16 +1,10 @@
 name: CI
 
-on:
-  pull_request:   # Add this section
-    branches:
-      - main
-  push:
-    branches:
-      - development
+on: [push]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
@@ -22,19 +16,19 @@ jobs:
         dotnet-version: 7.0.309
 
     - name: Change directory
-      run: cd ES6WebApi
+      run: cd OneCampus
     
     - name: Restore dependencies
       run: |
-            cd ES6WebApi
+            cd OneCampus
             dotnet restore
 
     - name: Test
       run: |
-            cd ES6WebApi
+            cd OneCampus
             dotnet test
     
     - name: Build
       run: |
-            cd ES6WebApi
+            cd OneCampus
             dotnet build
