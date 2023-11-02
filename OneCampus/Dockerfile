@@ -7,10 +7,10 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/OneCampus.Api/OneCampus.Api.csproj", "OneCampus.Api/"]
-RUN dotnet restore "OneCampus.Api/OneCampus.Api.csproj"
+COPY ["src/OneCampus.Api/OneCampus.Api.csproj", "src/OneCampus.Api/"]
+RUN dotnet restore "src/OneCampus.Api/OneCampus.Api.csproj"
 COPY . .
-WORKDIR "/src/OneCampus.Api"
+WORKDIR "/src/src/OneCampus.Api"
 RUN dotnet build "OneCampus.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
