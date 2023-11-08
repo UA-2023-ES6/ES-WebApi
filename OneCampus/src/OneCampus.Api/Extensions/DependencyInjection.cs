@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OneCampus.Application.Providers;
-using OneCampus.Infrastructure.Data;
-using Throw;
+﻿using OneCampus.Application;
+using OneCampus.Infrastructure;
 
 namespace OneCampus;
 
@@ -12,10 +10,8 @@ internal static class DependencyInjection
         services.ThrowIfNull();
         configuration.ThrowIfNull();
 
-        var bdConfiguration = configuration.GetConnectionString("OneCampusDb").ThrowIfNull().Value;
-
         return services
-            .AddDbContext<OneCampusDbContext>(options => options.UseMySQL(bdConfiguration))
-            .AddScoped<IDateTimeProvider, DateTimeProvider>();
+            .AddApplication()
+            .AddInfrastructure(configuration);
     }
 }
