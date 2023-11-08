@@ -19,4 +19,10 @@
         </SonarQubeSetting>
     </ItemGroup>
     
+    <ItemGroup>
+      <None Remove="Entities\Messages\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Entities\Messages\" />
+    </ItemGroup>
 </Project>

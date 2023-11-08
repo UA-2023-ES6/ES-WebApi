@@ -1,0 +1,58 @@
+﻿using Microsoft.EntityFrameworkCore;
+using OneCampus.Domain.Entities.Groups;
+using OneCampus.Domain.Entities.Messages;
+using OneCampus.Domain.Repositories;
+using OneCampus.Infrastructure.Data;
+using Database = OneCampus.Infrastructure.Data.Entities;
+
+namespace OneCampus.Infrastructure.Repositories;
+
+public class MessageRepository : IMessageRepository
+{
+    private readonly IDbContextFactory<OneCampusDbContext> _oneCampusDbContextFactory;
+
+    public MessageRepository(IDbContextFactory<OneCampusDbContext> oneCampusDbContextFactory)
+    {
+        _oneCampusDbContextFactory = oneCampusDbContextFactory.ThrowIfNull().Value;
+    }
+
+    public async Task<Message> CreateAsync(string content, int groupId)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            Guid myGuid = Guid.NewGuid();
+
+            var message = new Database.Message
+            {
+                Content = content,
+                GroupId = groupId,
+                UserId = myGuid,
+                CreateDate = DateTime.UtcNow,
+            };
+
+            var result = await context.Messages.AddAsync(message);
+
+            await context.SaveChangesAsync();
+
+            return result.Entity.ToMessage();
+
+        }
+    }
+
+    public async Task<List<Message>?> FindMessagesAsync(int id)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            var database_messages = await context.Messages
+            .AsNoTracking()
+            .Where(m => m.GroupId == id)
+            .ToListAsync();
+
+            var messages = database_messages.Select(dbMsg => dbMsg.ToMessage()).ToList();
+
+            return messages;
+        }
+    }
+
+
+}
