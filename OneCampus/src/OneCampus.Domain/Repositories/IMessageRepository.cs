@@ -4,7 +4,7 @@ namespace OneCampus.Domain.Repositories;
 
 public interface IMessageRepository
 {
-    Task<Message> CreateAsync(string content, int groupId);
+    Task<Message> CreateAsync(string content, int groupId, Guid userId);
 
     Task<List<Message>> FindMessagesAsync(int groupId);
 

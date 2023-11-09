@@ -4,7 +4,7 @@ namespace OneCampus.Domain.Services;
 
 public interface IMessageService
 {   
-    Task<Message> CreateMessageAsync(int groupId, string content);
+    Task<Message> CreateMessageAsync(int groupId, string content, Guid userId);
 
     Task<List<Message>> FindMessagesByGroupAsync(int groupId);
 

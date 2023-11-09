@@ -16,23 +16,29 @@ public class MessageRepository : IMessageRepository
         _oneCampusDbContextFactory = oneCampusDbContextFactory.ThrowIfNull().Value;
     }
 
-    public async Task<Message> CreateAsync(string content, int groupId)
+    public async Task<Message> CreateAsync(string content, int groupId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
-            Guid myGuid = Guid.NewGuid();
 
             var message = new Database.Message
             {
                 Content = content,
                 GroupId = groupId,
-                UserId = myGuid,
+                UserId = userId,
                 CreateDate = DateTime.UtcNow,
             };
+
+            Console.WriteLine("comes here");
+            Console.WriteLine(context.Messages.GetAsyncEnumerator());
+
 
             var result = await context.Messages.AddAsync(message);
 
             await context.SaveChangesAsync();
+
+            Console.WriteLine("comes here 2");
+
 
             return result.Entity.ToMessage();
 

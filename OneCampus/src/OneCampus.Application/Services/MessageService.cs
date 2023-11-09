@@ -21,7 +21,7 @@ public class MessageService : IMessageService
 
     }
 
-    public async Task<Message> CreateMessageAsync(int groupId, string content)
+    public async Task<Message> CreateMessageAsync(int groupId, string content, Guid userId)
     {
         content.Throw()
             .IfEmpty()
@@ -30,7 +30,7 @@ public class MessageService : IMessageService
         groupId.Throw()
             .IfNegativeOrZero();
 
-        return await _messageRepository.CreateAsync(content, groupId);
+        return await _messageRepository.CreateAsync(content, groupId, userId);
     }
 
     public async Task<List<Message>> FindMessagesByGroupAsync(int groupId)

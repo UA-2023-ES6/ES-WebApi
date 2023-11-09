@@ -30,7 +30,7 @@ public class MessageController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateMessageAsync([FromBody] CreateMessageRequest request)
     {
-        var message = await _messageService.CreateMessageAsync(request.GroupId, request.Content);
+        var message = await _messageService.CreateMessageAsync(request.GroupId, request.Content, request.UserId);
 
         return Ok(new BaseResponse<CreateMessageRequest, Message>(request, message));
     }
