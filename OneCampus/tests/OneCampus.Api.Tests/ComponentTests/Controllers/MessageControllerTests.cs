@@ -67,7 +67,8 @@ public class MessageControllerTests
             .ReturnsAsync(expected);
 
         // Act
-        var result = await _controller.FindGroupMessagesAsync(validId);
+        var result = await _controller.FindGroupAsync(validId);
+
 
         // Assert
         result.Should().NotBeNull()
