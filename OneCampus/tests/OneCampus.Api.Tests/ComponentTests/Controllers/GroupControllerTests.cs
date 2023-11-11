@@ -88,6 +88,10 @@ public class GroupControllerTests
             .And.BeOfType<OkObjectResult>();
 
         var okResult = result as OkObjectResult;
+
+        okResult!.Value.Should().NotBeNull()
+            .And.BeOfType<BaseResponseWithoutRequest<IEnumerable<Group>>>();
+
         var response = okResult!.Value as BaseResponseWithoutRequest<IEnumerable<Group>>;
 
         response.Should().NotBeNull();

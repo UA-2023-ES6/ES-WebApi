@@ -1,14 +1,11 @@
-﻿using System;
-using System.Net.Mime;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
-using OneCampus.Application.Services;
 using OneCampus.Domain.Entities.Messages;
 using OneCampus.Domain.Services;
+using System.Net.Mime;
 
 namespace OneCampus.Api.Controllers;
-
 
 [Route("api/[controller]")]
 [ApiController]
@@ -20,35 +17,35 @@ public class MessageController : ControllerBase
 
 
     public MessageController(IMessageService messageService)
-	{
+    {
         _messageService = messageService.ThrowIfNull().Value;
 
     }
 
     [HttpPost()]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<CreateMessageRequest,Message>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<CreateMessageRequest, Message>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateMessageAsync([FromBody] CreateMessageRequest request)
     {
         var message = await _messageService.CreateMessageAsync(request.GroupId, request.Content, request.UserId);
 
-        return Ok(new BaseResponse<CreateMessageRequest, Message>(request, message));
+        return Ok(new BaseResponse<CreateMessageRequest, Message>(request, message!));
     }
 
-    [HttpGet("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<MessagesByGroupRequest, List<Message>>))]
+    [HttpGet("group/{groupId}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<MessagesByGroupRequest, Message>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> FindGroupAsync([FromRoute] int id)
+    public async Task<ActionResult> FindGroupAsync([FromRoute] int groupId)
     {
-        var messages = await _messageService.FindMessagesByGroupAsync(id);
+        var messages = await _messageService.FindMessagesByGroupAsync(groupId);
 
         var request = new MessagesByGroupRequest
         {
-            GroupId = id
+            GroupId = groupId
         };
 
-        return Ok(new BaseResponse<MessagesByGroupRequest, List<Message>>(request, messages));
+        return Ok(new EnumerableResponse<MessagesByGroupRequest, Message>(request, messages, messages.Count()));
     }
 }
 

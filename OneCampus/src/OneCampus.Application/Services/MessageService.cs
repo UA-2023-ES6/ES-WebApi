@@ -7,21 +7,21 @@ namespace OneCampus.Application.Services;
 
 public class MessageService : IMessageService
 {
-    private readonly IGroupRepository _groupRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IInstitutionRepository _institutionRepository;
-
     private readonly IMessageRepository _messageRepository;
-
+    private readonly IUserRepository _userRepository;
+    private readonly IGroupRepository _groupRepository;
 
     public MessageService(
-        IMessageRepository messageRepository)
+        IMessageRepository messageRepository,
+        IUserRepository userRepository,
+        IGroupRepository groupRepository)
     {
         _messageRepository = messageRepository.ThrowIfNull().Value;
-
+        _userRepository = userRepository.ThrowIfNull().Value;
+        _groupRepository = groupRepository.ThrowIfNull().Value;
     }
 
-    public async Task<Message> CreateMessageAsync(int groupId, string content, Guid userId)
+    public async Task<Message?> CreateMessageAsync(int groupId, string content, Guid userId)
     {
         content.Throw()
             .IfEmpty()
@@ -30,20 +30,32 @@ public class MessageService : IMessageService
         groupId.Throw()
             .IfNegativeOrZero();
 
+        var user = await _userRepository.FindAsync(userId);
+        if (user is null)
+        {
+            throw new NotFoundException("user not found");
+        }
+
+        var group = await _groupRepository.FindAsync(groupId);
+        if (group is null)
+        {
+            throw new NotFoundException("group not found");
+        }
+
         return await _messageRepository.CreateAsync(content, groupId, userId);
     }
 
-    public async Task<List<Message>> FindMessagesByGroupAsync(int groupId)
+    public async Task<IEnumerable<Message>> FindMessagesByGroupAsync(int groupId)
     {
         groupId.Throw()
             .IfNegativeOrZero();
 
-        var messages = await _messageRepository.FindMessagesAsync(groupId);
-        if (messages is null)
+        var group = await _groupRepository.FindAsync(groupId);
+        if (group is null)
         {
-            throw new NotFoundException("messages not found.");
+            throw new NotFoundException("group not found");
         }
 
-        return messages;
+        return await _messageRepository.GetMessagesByGroupAsync(groupId);
     }
 }

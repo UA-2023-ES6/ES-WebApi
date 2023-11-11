@@ -9,6 +9,8 @@ public class UserRepositoryTests
 
     private UserRepository _userRepository;
 
+    private IDbContextFactory<OneCampusDbContext> _dbContextFactory => _mockDbContextFactory.Object;
+
     [SetUp]
     public void SetUp()
     {
@@ -45,19 +47,7 @@ public class UserRepositoryTests
     [Test]
     public async Task FindAsync_WithUser_ReturnsTheUser()
     {
-        var dbUser = _fixture.Build<Database.User>()
-            .Without(item => item.Id)
-            .Without(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Users.AddAsync(dbUser);
-
-            await dbContext.SaveChangesAsync();
-
-            dbUser = result.Entity;
-        }
+        var dbUser = await UserHelper.AddUserAsync(_dbContextFactory);
 
         var user = await _userRepository.FindAsync(dbUser.Id);
 
@@ -69,19 +59,7 @@ public class UserRepositoryTests
     [Test]
     public async Task FindAsync_WithDeletedUser_ReturnsNull()
     {
-        var dbUser = _fixture.Build<Database.User>()
-            .Without(item => item.Id)
-            .With(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Users.AddAsync(dbUser);
-
-            await dbContext.SaveChangesAsync();
-
-            dbUser = result.Entity;
-        }
+        var dbUser = await UserHelper.AddUserAsync(_dbContextFactory, builder => builder.With(item => item.DeleteDate));
 
         var user = await _userRepository.FindAsync(dbUser.Id);
 

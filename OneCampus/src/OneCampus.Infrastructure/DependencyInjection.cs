@@ -21,7 +21,6 @@ public static class DependencyInjection
             .AddScoped<IGroupRepository, GroupRepository>()
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IMessageRepository, MessageRepository>()
-
             .AddScoped<IInstitutionRepository, InstitutionRepository>();
     }
 }
