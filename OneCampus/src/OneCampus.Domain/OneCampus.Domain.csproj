@@ -21,8 +21,10 @@
     
     <ItemGroup>
       <None Remove="Entities\Messages\" />
+      <None Remove="Entities\Forums\" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Entities\Messages\" />
+      <Folder Include="Entities\Forums\" />
     </ItemGroup>
 </Project>

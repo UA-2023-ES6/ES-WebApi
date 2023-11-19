@@ -35,4 +35,7 @@
 		</SonarQubeSetting>
 	</ItemGroup>
 	
+	<ItemGroup>
+	  <None Remove="Controllers\QuestionController.cd" />
+	</ItemGroup>
 </Project>
