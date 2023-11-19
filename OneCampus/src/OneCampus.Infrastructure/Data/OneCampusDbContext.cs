@@ -12,6 +12,8 @@ public class OneCampusDbContext : DbContext
     public DbSet<Group> Groups { get; set; }
     public DbSet<Event> Events { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<Question> Questions { get; set; }
+    public DbSet<Answer> Answers { get; set; }
 
     public OneCampusDbContext()
     {
