@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using OneCampus;
 using OneCampus.Api.Middlewares;
+using OneCampus.Application.Services;
+using OneCampus.Domain.Repositories;
+using OneCampus.Domain.Services;
 using OneCampus.Infrastructure.Data;
+using OneCampus.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +19,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddServices(builder.Configuration);
+
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+
 
 builder.Services.AddCors();
 

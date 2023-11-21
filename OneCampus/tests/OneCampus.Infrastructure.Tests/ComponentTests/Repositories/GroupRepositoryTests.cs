@@ -1,6 +1,4 @@
-﻿using AutoFixture.Dsl;
-
-namespace OneCampus.Infrastructure.Tests.ComponentTests.Repositories;
+﻿namespace OneCampus.Infrastructure.Tests.ComponentTests.Repositories;
 
 [TestFixture]
 public class GroupRepositoryTests
@@ -10,6 +8,8 @@ public class GroupRepositoryTests
     private SqliteConnection _connection;
 
     private GroupRepository _groupRepository;
+
+    private IDbContextFactory<OneCampusDbContext> _dbContextFactory => _mockDbContextFactory.Object;
 
     [SetUp]
     public void SetUp()
@@ -47,7 +47,7 @@ public class GroupRepositoryTests
     [Test]
     public async Task CreateAsync_CreateGroup_ReturnsTheGroup()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
 
         const string Name = "group name";
 
@@ -65,8 +65,8 @@ public class GroupRepositoryTests
     [Test]
     public async Task UpdateAsync_CreateGroup_ReturnsTheGroup()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
-        var dbGroup = await AddGroupAsync(dbGroupWithInstitution.Id);
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
         const string Name = "new group name";
 
@@ -90,7 +90,7 @@ public class GroupRepositoryTests
             .Without(item => item.DeleteDate)
             .Create();
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Groups.AddAsync(dbGroup);
 
@@ -109,18 +109,9 @@ public class GroupRepositoryTests
     [Test]
     public async Task FindAsync_WithDeletedGroup_ReturnsNull()
     {
-        var dbGroup = GetMockedGroupWithInstitution()
-            .With(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Groups.AddAsync(dbGroup);
-
-            await dbContext.SaveChangesAsync();
-
-            dbGroup = result.Entity;
-        }
+        var dbGroup = await GroupHelper.AddGroupWithInstitutionAsync(
+           _dbContextFactory,
+            builder => builder.With(item => item.DeleteDate));
 
         var group = await _groupRepository.FindAsync(dbGroup.Id);
 
@@ -134,7 +125,7 @@ public class GroupRepositoryTests
     [Test]
     public async Task FindByInstitutionIdAsync_WithInstitution_ReturnsTheInstitution()
     {
-        var dbGroup = await AddGroupWithInstitutionAsync();
+        var dbGroup = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
 
         var group = await _groupRepository.FindByInstitutionIdAsync(dbGroup.Institution!.Id);
 
@@ -146,18 +137,9 @@ public class GroupRepositoryTests
     [Test]
     public async Task FindByInstitutionIdAsync_WithDeletedInstitution_ReturnsNull()
     {
-        var dbGroup = GetMockedGroupWithInstitution()
-            .With(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Groups.AddAsync(dbGroup);
-
-            await dbContext.SaveChangesAsync();
-
-            dbGroup = result.Entity;
-        }
+        var dbGroup = await GroupHelper.AddGroupWithInstitutionAsync(
+            _dbContextFactory,
+            builder => builder.With(item => item.DeleteDate));
 
         var group = await _groupRepository.FindByInstitutionIdAsync(dbGroup.Institution!.Id);
 
@@ -171,10 +153,14 @@ public class GroupRepositoryTests
     [Test]
     public async Task GetSubGroupsAsync_GetSubGroups_ReturnsSubGroups()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
-        var dbGroup = await AddGroupAsync(dbGroupWithInstitution.Id);
-        var dbGroup2 = await AddGroupAsync(dbGroupWithInstitution.Id, deleted: true);
-        var dbGroup3 = await AddGroupAsync(dbGroupWithInstitution.Id);
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
+        var dbGroup2 = await GroupHelper.AddGroupAsync(
+            _dbContextFactory,
+            builder => builder
+                .With(item => item.ParentId,  dbGroupWithInstitution.Id)
+                .With(item => item.DeleteDate));
+        var dbGroup3 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
         var groups = await _groupRepository.GetSubGroupsAsync(dbGroupWithInstitution.Id);
 
@@ -191,14 +177,14 @@ public class GroupRepositoryTests
     [Test]
     public async Task DeleteAsync_CreateGroup_ReturnsTheGroup()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
-        var dbGroup = await AddGroupAsync(dbGroupWithInstitution.Id);
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
         var group = await _groupRepository.DeleteAsync(dbGroup.Id);
 
         group.Should().NotBeNull();
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Groups.FindAsync(dbGroup.Id);
             result.Should().NotBeNull();
@@ -213,9 +199,9 @@ public class GroupRepositoryTests
     [Test]
     public async Task AddUserAsync_AddUser_ReturnsTheGroupWithTheNewUser()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
-        var dbGroup = await AddGroupAsync(dbGroupWithInstitution.Id);
-        var bdUser = await AddUserAsync();
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
+        var bdUser = await UserHelper.AddUserAsync(_dbContextFactory);
 
         var group = await _groupRepository.AddUserAsync(dbGroup.Id, bdUser.Id);
 
@@ -232,12 +218,12 @@ public class GroupRepositoryTests
     [Test]
     public async Task RemoveUserAsync_RemovesUser_ReturnsTheGroupWithoutTheUser()
     {
-        var dbGroupWithInstitution = await AddGroupWithInstitutionAsync();
-        var dbGroup = await AddGroupAsync(dbGroupWithInstitution.Id);
-        var bdUser = await AddUserAsync();
-        var bdUser2 = await AddUserAsync();
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
+        var bdUser = await UserHelper.AddUserAsync(_dbContextFactory);
+        var bdUser2 = await UserHelper.AddUserAsync(_dbContextFactory);
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Groups.FindAsync(dbGroup.Id);
             result!.Users.Add(bdUser);
@@ -253,77 +239,6 @@ public class GroupRepositoryTests
         group.Users.Should().NotBeNullOrEmpty()
             .And.Contain(user => user.Id == bdUser2.Id)
             .And.NotContain(user => user.Id == bdUser.Id);
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private IPostprocessComposer<Database.Group> GetMockedGroupWithInstitution()
-    {
-        var institution = _fixture.Build<Database.Institution>()
-            .Without(item => item.Group)
-            .Without(item => item.DeleteDate)
-            .Without(item => item.GroupId)
-            .Create();
-
-        return _fixture.Build<Database.Group>()
-            .Without(item => item.ParentId)
-            .With(item => item.Institution, institution);
-    }
-
-    private async Task<Database.Group> AddGroupWithInstitutionAsync()
-    {
-        var dbGroupWithInstitution = GetMockedGroupWithInstitution()
-            .Without(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Groups.AddAsync(dbGroupWithInstitution);
-
-            await dbContext.SaveChangesAsync();
-
-            return result.Entity;
-        }
-    }
-
-    private async Task<Database.Group> AddGroupAsync(int parentId, bool deleted = false)
-    {
-        var dbGroupWithInstitutionBuilder = GetMockedGroupWithInstitution()
-            .With(item => item.ParentId, parentId);
-
-        dbGroupWithInstitutionBuilder = deleted
-            ? dbGroupWithInstitutionBuilder.With(item => item.DeleteDate)
-            : dbGroupWithInstitutionBuilder.Without(item => item.DeleteDate);
-
-        var dbGroupWithInstitution = dbGroupWithInstitutionBuilder.Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Groups.AddAsync(dbGroupWithInstitution);
-
-            await dbContext.SaveChangesAsync();
-
-            return result.Entity;
-        }
-    }
-
-    private async Task<Database.User> AddUserAsync()
-    {
-        var dbUser = _fixture.Build<Database.User>()
-            .Without(item => item.Id)
-            .Without(item => item.DeleteDate)
-            .Create();
-
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
-        {
-            var result = await dbContext.Users.AddAsync(dbUser);
-
-            await dbContext.SaveChangesAsync();
-
-            return result.Entity;
-        }
     }
 
     #endregion

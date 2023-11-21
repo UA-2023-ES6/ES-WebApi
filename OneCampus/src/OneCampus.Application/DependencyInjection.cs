@@ -14,6 +14,8 @@ public static class DependencyInjection
 
         return services
             .AddScoped<IDateTimeProvider, DateTimeProvider>()
-            .AddScoped<IGroupService, GroupService>();
+            .AddScoped<IGroupService, GroupService>()
+            .AddScoped<IMessageService, MessageService>();
+
     }
 }

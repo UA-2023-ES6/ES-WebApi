@@ -2,12 +2,13 @@
 
 namespace OneCampus.Infrastructure.Data.Entities;
 
-public class Message
+public class Question
 {
     [Key]
     public int Id { get; set; }
 
     public string Content { get; set; } = null!;
+
     public DateTime CreateDate { get; set; }
 
     public Guid UserId { get; set; }
@@ -16,4 +17,5 @@ public class Message
     public virtual User User { get; set; } = null!;
     public virtual Group Group { get; set; } = null!;
 
+    public virtual List<Answer> Answers { get; set; } = new();
 }
