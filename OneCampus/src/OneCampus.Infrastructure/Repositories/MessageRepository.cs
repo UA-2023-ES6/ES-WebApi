@@ -37,7 +37,7 @@ public class MessageRepository : IMessageRepository
 
             await context.SaveChangesAsync();
 
-            return result.Entity.ToMessage(user.Name);
+            return result.Entity.ToMessage(user.Username);
         }
     }
 
@@ -50,7 +50,7 @@ public class MessageRepository : IMessageRepository
                 .Include(item => item.User)
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(item => item.CreateDate)
-                .Select(item => item.ToMessage(item.User.Name)!)
+                .Select(item => item.ToMessage(item.User.Username)!)
                 .ToListAsync();
         }
     }

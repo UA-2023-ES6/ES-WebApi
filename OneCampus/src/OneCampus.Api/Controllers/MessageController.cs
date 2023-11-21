@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Messages;
@@ -15,11 +16,12 @@ public class MessageController : ControllerBase
 {
     private readonly IMessageService _messageService;
 
+    private readonly UserInfo _userInfo;
 
-    public MessageController(IMessageService messageService)
+    public MessageController(IMessageService messageService, UserInfo userInfo)
     {
         _messageService = messageService.ThrowIfNull().Value;
-
+        _userInfo = userInfo.ThrowIfNull().Value;
     }
 
     [HttpPost()]
@@ -27,7 +29,7 @@ public class MessageController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateMessageAsync([FromBody] CreateMessageRequest request)
     {
-        var message = await _messageService.CreateMessageAsync(request.GroupId, request.Content, request.UserId);
+        var message = await _messageService.CreateMessageAsync(request.GroupId, request.Content, _userInfo.Id);
 
         return Ok(new BaseResponse<CreateMessageRequest, Message>(request, message!));
     }

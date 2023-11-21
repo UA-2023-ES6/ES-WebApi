@@ -1,6 +1,4 @@
-﻿using OneCampus.Domain.Entities.Users;
-
-namespace OneCampus.Domain.Entities.Forums;
+﻿namespace OneCampus.Domain.Entities.Forums;
 
 public sealed record Answer
 {
