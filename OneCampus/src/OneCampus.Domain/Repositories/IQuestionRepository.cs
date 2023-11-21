@@ -7,4 +7,7 @@ public interface IQuestionRepository
     Task<Question?> CreateAsync(string content, int groupId, Guid userId);
 
     Task<IEnumerable<Question>> GetQuestionsByGroupAsync(int groupId);
+
+    Task<Question?> FindAsync(int id);
+
 }
