@@ -1,22 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneCampus.Domain.Entities.Forums;
-using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Repositories;
 using OneCampus.Infrastructure.Data;
 using Database = OneCampus.Infrastructure.Data.Entities;
 
 namespace OneCampus.Infrastructure.Repositories;
 
-public class QuestionRepository : IQuestionRepository
+public class AnswerRepository : IAnswerRepository
 {
     private readonly IDbContextFactory<OneCampusDbContext> _oneCampusDbContextFactory;
 
-    public QuestionRepository(IDbContextFactory<OneCampusDbContext> oneCampusDbContextFactory)
+    public AnswerRepository(IDbContextFactory<OneCampusDbContext> oneCampusDbContextFactory)
     {
         _oneCampusDbContextFactory = oneCampusDbContextFactory.ThrowIfNull().Value;
     }
 
-    public async Task<Question?> CreateAsync(string content, int groupId, Guid userId)
+    public async Task<Answer?> CreateAsync(string content, int questionId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -26,45 +25,33 @@ public class QuestionRepository : IQuestionRepository
                 return null;
             }
 
-            var question = new Database.Question
+            var answer = new Database.Answer
             {
                 Content = content,
-                GroupId = groupId,
+                QuestionId = questionId,
                 UserId = userId,
                 CreateDate = DateTime.UtcNow
             };
 
-            var result = await context.Questions.AddAsync(question);
+            var result = await context.Answers.AddAsync(answer);
 
             await context.SaveChangesAsync();
 
-            return result.Entity.ToQuestion();
+            return result.Entity.ToAnswer();
         }
     }
 
-    public async Task<IEnumerable<Question>> GetQuestionsByGroupAsync(int groupId)
+    public async Task<IEnumerable<Answer>> GetAnswersByQuestionAsync(int questionId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
-            return await context.Questions
+            return await context.Answers
                 .AsNoTracking()
                 .Include(item => item.User)
-                .Where(m => m.GroupId == groupId)
+                .Where(m => m.QuestionId == questionId)
                 .OrderBy(item => item.CreateDate)
-                .Select(item => item.ToQuestion()!)
+                .Select(item => item.ToAnswer()!)
                 .ToListAsync();
-        }
-    }
-
-    public async Task<Question?> FindAsync(int id)
-    {
-        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
-        {
-            var question = await context.Questions
-                .AsNoTracking()
-                .FirstOrDefaultAsync(item => item.Id == id);
-
-            return question.ToQuestion();
         }
     }
 }
