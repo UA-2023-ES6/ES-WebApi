@@ -23,6 +23,10 @@ builder.Services.AddServices(builder.Configuration);
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
+builder.Services.AddScoped<IAnswerService, AnswerService>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+
+
 
 builder.Services.AddCors();
 
