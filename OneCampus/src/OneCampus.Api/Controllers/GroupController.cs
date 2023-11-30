@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCampus.Api.Models.Requests;
+using OneCampus.Api.Models.Requests.Groups;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Services;
@@ -81,6 +81,24 @@ public class GroupController : ControllerBase
         };
 
         return Ok(new BaseResponse<GroupByIdRequest, Group?>(request, group));
+    }
+
+    [HttpGet("{id}/user")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<UsersRequest, User>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetUsersAsync([FromRoute] int id, [FromQuery] int take, [FromQuery] int skip)
+    {
+        var (users, totalResults) = await _groupService.GetUsersAsync(id, take, skip);
+
+        var request = new UsersRequest
+        {
+            Id = id,
+            Take = take,
+            Skip = skip
+        };
+
+        return Ok(new EnumerableResponse<UsersRequest, User>(request, users, totalResults));
     }
 
     [HttpPost("{id}/user/{userId}")]

@@ -173,4 +173,24 @@ public class GroupService : IGroupService
 
         return group;
     }
+
+    public async Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip)
+    {
+        id.Throw()
+            .IfNegativeOrZero();
+
+        take.Throw()
+            .IfNegativeOrZero();
+
+        skip.Throw()
+            .IfNegative();
+
+        var group = await _groupRepository.FindAsync(id);
+        if (group is null)
+        {
+            throw new NotFoundException("group not found.");
+        }
+
+        return await _groupRepository.GetUsersAsync(id, take, skip);
+    }
 }

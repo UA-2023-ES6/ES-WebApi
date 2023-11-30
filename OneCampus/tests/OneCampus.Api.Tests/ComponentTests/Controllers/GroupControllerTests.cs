@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
-using OneCampus.Api.Models.Requests;
+using OneCampus.Api.Models.Requests.Groups;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Services;

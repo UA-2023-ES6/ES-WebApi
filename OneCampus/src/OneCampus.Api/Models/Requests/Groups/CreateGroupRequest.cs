@@ -1,4 +1,4 @@
-﻿namespace OneCampus.Api.Models.Requests;
+﻿namespace OneCampus.Api.Models.Requests.Groups;
 
 public class CreateGroupRequest
 {

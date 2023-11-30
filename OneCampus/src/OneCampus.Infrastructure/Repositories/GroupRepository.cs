@@ -165,4 +165,26 @@ public class GroupRepository : IGroupRepository
             return group.ToGroup(group.Users.Select(item => item.ToUser()!))!;
         }
     }
+
+    public async Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            var query = context.Users.Where(item => item.DeleteDate == null && item.Groups.Any(item => item.Id == id));
+
+            var totalResults = await query.CountAsync();
+            if (totalResults == 0)
+            {
+                return (Enumerable.Empty<User>(), 0);
+            }
+
+            var users = await query
+                .OrderBy(item => item.Username)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            return (users.Select(item => item.ToUser()!), totalResults);
+        }
+    }
 }

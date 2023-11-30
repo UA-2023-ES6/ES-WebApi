@@ -17,4 +17,6 @@ public interface IGroupService
     Task<Group> AddUserAsync(int groupId, Guid userId);
 
     Task<Group> RemoveUserAsync(int groupId, Guid userId);
+
+    Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip);
 }
