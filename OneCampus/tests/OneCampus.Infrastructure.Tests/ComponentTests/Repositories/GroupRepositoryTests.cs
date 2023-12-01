@@ -153,6 +153,8 @@ public class GroupRepositoryTests
     [Test]
     public async Task GetSubGroupsAsync_GetSubGroups_ReturnsSubGroups()
     {
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+
         var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
         var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
         var dbGroup2 = await GroupHelper.AddGroupAsync(
@@ -162,7 +164,34 @@ public class GroupRepositoryTests
                 .With(item => item.DeleteDate));
         var dbGroup3 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
-        var groups = await _groupRepository.GetSubGroupsAsync(dbGroupWithInstitution.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup2.Id, user.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
+
+        var groups = await _groupRepository.GetSubGroupsAsync(user.Id, dbGroupWithInstitution.Id);
+
+        groups.Should().NotBeNullOrEmpty()
+            .And.Contain(item => item.Id == dbGroup.Id)
+            .And.NotContain(item => item.Id == dbGroup2.Id)
+            .And.Contain(item => item.Id == dbGroup3.Id);
+    }
+
+    [Test]
+    public async Task GetSubGroupsAsync_GetSubGroupsWithUser_ReturnsSubGroupsThatUserHasAccess()
+    {
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+
+        var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
+        var dbGroup2 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);      
+        var dbGroup3 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
+
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
+        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
+
+        var groups = await _groupRepository.GetSubGroupsAsync(user.Id, dbGroupWithInstitution.Id);
 
         groups.Should().NotBeNullOrEmpty()
             .And.Contain(item => item.Id == dbGroup.Id)

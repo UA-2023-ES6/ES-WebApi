@@ -80,13 +80,15 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<IEnumerable<Group>> GetSubGroupsAsync(int id)
+    public async Task<IEnumerable<Group>> GetSubGroupsAsync(Guid userId, int id)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var groups = await context.Groups
                 .AsNoTracking()
-                .Where(item => item.DeleteDate == null && item.ParentId == id)
+                .Where(item => item.DeleteDate == null &&
+                    item.ParentId == id &&
+                    item.Users.Any(item => item.Id == userId))
                 .ToListAsync();
 
             return groups.Select(group => group.ToGroup()!);
@@ -185,6 +187,19 @@ public class GroupRepository : IGroupRepository
                 .ToListAsync();
 
             return (users.Select(item => item.ToUser()!), totalResults);
+        }
+    }
+
+    public async Task<bool> IsUserInTheGroupAsync(Guid userId, int groupId)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            return await context.Groups
+                .AsNoTracking()
+                .Include(item => item.Users)
+                .AnyAsync(item => item.DeleteDate == null && 
+                    item.Id == groupId &&
+                    item.Users.Any(item => item.Id == userId));
         }
     }
 }

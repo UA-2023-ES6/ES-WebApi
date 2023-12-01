@@ -6,5 +6,5 @@ public interface IInstitutionRepository
 {
     Task<Institution> FindAsync(int id);
 
-    Task<IEnumerable<Institution>> GetAsync();
+    Task<IEnumerable<Institution>> GetAsync(Guid userId);
 }

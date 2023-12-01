@@ -19,7 +19,7 @@ public static class DependencyInjection
         return services
             .AddDbContextFactory<OneCampusDbContext>(options => options.UseMySQL(bdConnectionString))
             .AddScoped<IGroupRepository, GroupRepository>()
-            .AddSingleton<IUserRepository, UserRepository>()
+            .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IMessageRepository, MessageRepository>()
             .AddScoped<IInstitutionRepository, InstitutionRepository>()
             .AddScoped<IQuestionRepository, QuestionRepository>()

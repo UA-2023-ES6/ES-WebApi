@@ -8,16 +8,15 @@ public class UserAuthMiddleware
 {
     private readonly RequestDelegate _next;
 
-    private readonly IUsersService _usersService;
-
-    public UserAuthMiddleware(RequestDelegate next, IUsersService usersService)
+    public UserAuthMiddleware(RequestDelegate next)
     {
         _next = next;
-        _usersService = usersService.ThrowIfNull().Value;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IUsersService usersService, DebugDataService debugDataService)
     {
+        usersService.ThrowIfNull();
+
         var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
         if (token == null)
         {
@@ -44,10 +43,12 @@ public class UserAuthMiddleware
             throw new ArgumentException("invalid id");
         }
 
-        var user = await _usersService.FindAsync(guid);
+        var user = await usersService.FindAsync(guid);
         if (user == null)
         {
-            user = await _usersService.CreateAsync(guid, username, email);
+            user = await usersService.CreateAsync(guid, username, email);
+
+            await debugDataService.AddUserToDefaultInstitution(guid);
         }
 
         if (user.Username != username || user.Email != email)

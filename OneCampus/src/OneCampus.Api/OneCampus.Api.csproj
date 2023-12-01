@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -27,16 +27,16 @@
     <ProjectReference Include="..\OneCampus.Infrastructure\OneCampus.Infrastructure.csproj" />
   </ItemGroup>
 
-	<ItemGroup>
-		<SonarQubeSetting Include="sonar.coverage.exclusions">
-			<Value>**/Program.cs</Value>
-		</SonarQubeSetting>
-		<SonarQubeSetting Include="sonar.exclusions">
-			<Value>**/Program.cs</Value>
-		</SonarQubeSetting>
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <None Remove="Controllers\QuestionController.cd" />
-	</ItemGroup>
+    <ItemGroup>
+        <SonarQubeSetting Include="sonar.coverage.exclusions">
+            <Value>**/Program.cs, **/DebugHelpers/**</Value>
+        </SonarQubeSetting>
+        <SonarQubeSetting Include="sonar.exclusions">
+            <Value>**/Program.cs, **/DebugHelpers/**</Value>
+        </SonarQubeSetting>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Controllers\QuestionController.cd" />
+    </ItemGroup>
 </Project>

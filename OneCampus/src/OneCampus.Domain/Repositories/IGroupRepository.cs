@@ -12,7 +12,7 @@ public interface IGroupRepository
 
     Task<Group?> FindByInstitutionIdAsync(int institutionId);
 
-    Task<IEnumerable<Group>> GetSubGroupsAsync(int id);
+    Task<IEnumerable<Group>> GetSubGroupsAsync(Guid userId, int id);
 
     Task<Group?> DeleteAsync(int id);
 
@@ -21,4 +21,6 @@ public interface IGroupRepository
     Task<Group?> RemoveUserAsync(int groupId, Guid userId);
 
     Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip);
+
+    Task<bool> IsUserInTheGroupAsync(Guid userId, int groupId);
 }

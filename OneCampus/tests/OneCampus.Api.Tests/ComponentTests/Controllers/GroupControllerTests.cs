@@ -1,5 +1,7 @@
+using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests.Groups;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Groups;
@@ -10,9 +12,13 @@ namespace OneCampus.Tests.ComponentTests.Controllers;
 [TestFixture]
 public class GroupControllerTests
 {
+    private readonly Fixture _fixture = new();
+
     private Mock<IGroupService> _mockIGroupService;
 
     private GroupController _controller;
+
+    private  UserInfo userInfo;
 
     private readonly CreateGroupRequest request = new CreateGroupRequest
     {
@@ -32,13 +38,15 @@ public class GroupControllerTests
     {
         _mockIGroupService = new Mock<IGroupService>(MockBehavior.Strict);
 
-        _controller = new GroupController(_mockIGroupService.Object);
+        userInfo = _fixture.Create<UserInfo>();
+
+        _controller = new GroupController(_mockIGroupService.Object, userInfo);
     }
 
     [Test]
     public async Task CreateGroupAsyncTest()
     {
-        _mockIGroupService.Setup(s => s.CreateGroupAsync(request.Name, request.ParentGroupId))
+        _mockIGroupService.Setup(s => s.CreateGroupAsync(userInfo.Id, request.Name, request.ParentGroupId))
             .ReturnsAsync(expectedGroup);
 
         var result = await _controller.CreateGroupAsync(request);
@@ -55,7 +63,7 @@ public class GroupControllerTests
     [Test]
     public async Task UpdateGroupAsyncTest()
     {
-        _mockIGroupService.Setup(s => s.UpdateGroupAsync(0, "TestGroup"))
+        _mockIGroupService.Setup(s => s.UpdateGroupAsync(userInfo.Id, 0, "TestGroup"))
             .ReturnsAsync(expectedGroup);
 
         var result = await _controller.UpdateGroupAsync(0, update_request);
@@ -79,7 +87,7 @@ public class GroupControllerTests
             new Group(3, "TestGroup3"),
         };
 
-        _mockIGroupService.Setup(s => s.GetGroupsAsync())
+        _mockIGroupService.Setup(s => s.GetGroupsAsync(userInfo.Id))
             .ReturnsAsync(expectedData);
 
         var result = await _controller.GetGroupsAsync();
@@ -105,7 +113,7 @@ public class GroupControllerTests
         int validId = 1;  // Assuming 1 is a valid ID for this test
         var expected = new Group(1, "TestGroup");
 
-        _mockIGroupService.Setup(s => s.FindGroupAsync(validId))
+        _mockIGroupService.Setup(s => s.FindGroupAsync(userInfo.Id, validId))
             .ReturnsAsync(expected);
 
         // Act
@@ -130,7 +138,7 @@ public class GroupControllerTests
         int validId = 1;  // Assuming 1 is a valid ID for this test
         var expectedDeletedGroup = new Group(1, "TestGroup");
 
-        _mockIGroupService.Setup(s => s.DeleteGroupAsync(validId))
+        _mockIGroupService.Setup(s => s.DeleteGroupAsync(userInfo.Id, validId))
             .ReturnsAsync(expectedDeletedGroup);
 
         // Act
@@ -156,7 +164,7 @@ public class GroupControllerTests
         Guid validUserId = Guid.NewGuid();  // Sample User ID
         var expected = new Group(1, "TestGroup");
 
-        _mockIGroupService.Setup(s => s.AddUserAsync(validGroupId, validUserId))
+        _mockIGroupService.Setup(s => s.AddUserAsync(userInfo.Id, validGroupId, validUserId))
             .ReturnsAsync(expected);
 
         // Act
@@ -185,7 +193,7 @@ public class GroupControllerTests
             // ... mock a group, e.g., Id = 1, Name = "Updated Group", ...
         };
 
-        _mockIGroupService.Setup(s => s.RemoveUserAsync(validGroupId, validUserId))
+        _mockIGroupService.Setup(s => s.RemoveUserAsync(userInfo.Id, validGroupId, validUserId))
             .ReturnsAsync(expectedGroupAfterRemoval);
 
         // Act

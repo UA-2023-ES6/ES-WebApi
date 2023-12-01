@@ -67,6 +67,25 @@ public static class GroupHelper
         }
     }
 
+    public static async Task AddUserToGroupAsync(
+        IDbContextFactory<OneCampusDbContext> dbContextFactory,
+        int groupId,
+        Guid userId)
+    {
+        using (var dbContext = await dbContextFactory.CreateDbContextAsync())
+        {
+            var group = await dbContext.Groups
+                .Include(item => item.Users)
+                .FirstAsync(item => item.Id == groupId);
+
+            var user = await dbContext.Users.FindAsync(userId);
+
+            group.Users.Add(user!);
+
+            await dbContext.SaveChangesAsync();
+        }
+    }
+
     #region Private Methods
 
     private static IPostprocessComposer<Database.Group> GetMockedGroupWithInstitution()

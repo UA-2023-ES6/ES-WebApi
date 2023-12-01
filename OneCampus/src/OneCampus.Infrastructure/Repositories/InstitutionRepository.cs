@@ -26,13 +26,13 @@ public class InstitutionRepository : IInstitutionRepository
         }
     }
 
-    public async Task<IEnumerable<Institution>> GetAsync()
+    public async Task<IEnumerable<Institution>> GetAsync(Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var institutions = await context.Institutions
                 .AsNoTracking()
-                .Where(item => item.DeleteDate == null )
+                .Where(item => item.DeleteDate == null && item.Group.Users.Any(item => item.Id == userId))
                 .ToListAsync();
 
             return institutions.Select(item => item.ToInstitution()!);
