@@ -20,12 +20,12 @@ jobs:
 
     - name: Login to Amazon ECR
       run: |
-         aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k5p1b8a9
+         aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 866681751834.dkr.ecr.eu-west-3.amazonaws.com
     - name: Build, Tag, and Push the Image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: public.ecr.aws/k5p1b8a9
-        ECR_REPOSITORY: esapi
+        ECR_REGISTRY: 866681751834.dkr.ecr.eu-west-3.amazonaws.com
+        ECR_REPOSITORY: onecampus-api
         IMAGE_TAG: latest
       run: |
         cd OneCampus
