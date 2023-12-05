@@ -42,6 +42,25 @@ public class UserRepositoryTests
         _connection.Dispose();
     }
 
+    #region CreateAsync
+
+    [Test]
+    public async Task CreateAsync_CreateGroup_ReturnsTheGroup()
+    {
+        Guid id = Guid.NewGuid();
+        const string UserName = "username";
+        const string Email = "email";
+
+        var user = await _userRepository.CreateAsync(id,UserName, Email);
+
+        user.Should().NotBeNull();
+        user!.Id.Should().Be(id);
+        user.Username.Should().Be(UserName);
+        user.Email.Should().Be(Email);
+    }
+
+    #endregion
+
     #region FindAsync
 
     [Test]
@@ -53,7 +72,7 @@ public class UserRepositoryTests
 
         user.Should().NotBeNull();
         user!.Id.Should().Be(dbUser.Id);
-        user.Name.Should().Be(dbUser.Name);
+        user.Username.Should().Be(dbUser.Username);
     }
 
     [Test]
@@ -62,6 +81,47 @@ public class UserRepositoryTests
         var dbUser = await UserHelper.AddUserAsync(_dbContextFactory, builder => builder.With(item => item.DeleteDate));
 
         var user = await _userRepository.FindAsync(dbUser.Id);
+
+        user.Should().BeNull();
+    }
+
+    #endregion
+
+
+    #region FindByEmailAsync
+
+    [Test]
+    public async Task FindByEmailAsync_WithUser_ReturnsTheUser()
+    {
+        var dbUser = _fixture.Build<Database.User>()
+            .Without(item => item.DeleteDate)
+            .Create();
+
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            var result = await dbContext.Users.AddAsync(dbUser);
+
+            await dbContext.SaveChangesAsync();
+
+            dbUser = result.Entity;
+        }
+
+        var user = await _userRepository.FindByEmailAsync(dbUser.Email);
+
+        user.Should().NotBeNull();
+        user!.Id.Should().Be(dbUser.Id);
+        user.Username.Should().Be(dbUser.Username);
+        user.Email.Should().Be(dbUser.Email);
+    }
+
+    [Test]
+    public async Task FindByEmailAsync_WithDeletedUser_ReturnsNull()
+    {
+        var dbUser = await UserHelper.AddUserAsync(
+           _dbContextFactory,
+            builder => builder.With(item => item.DeleteDate));
+
+        var user = await _userRepository.FindByEmailAsync(dbUser.Email);
 
         user.Should().BeNull();
     }

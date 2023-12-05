@@ -1,4 +1,5 @@
-﻿using OneCampus.Application;
+﻿using OneCampus.Api.Models;
+using OneCampus.Application;
 using OneCampus.Infrastructure;
 
 namespace OneCampus;
@@ -12,6 +13,7 @@ internal static class DependencyInjection
 
         return services
             .AddApplication()
-            .AddInfrastructure(configuration);
+            .AddInfrastructure(configuration)
+            .AddScoped<UserInfo>();
     }
 }

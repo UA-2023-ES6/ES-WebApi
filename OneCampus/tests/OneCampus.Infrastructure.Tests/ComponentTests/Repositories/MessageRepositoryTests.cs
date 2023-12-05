@@ -59,7 +59,7 @@ public class MessageRepositoryTests
         message.Content.Should().Be(Content);
         message.GroupId.Should().Be(group.Id);
         message.SenderName.Should().NotBeNullOrWhiteSpace()
-            .And.Be(user.Name);
+            .And.Be(user.Username);
     }
 
     [Test]

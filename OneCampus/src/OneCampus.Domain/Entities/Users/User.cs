@@ -3,16 +3,16 @@
 public sealed record User
 {
     public Guid Id { get; }
-    public string Name { get; }
+    public string Username { get; }
     public string Email { get; }
 
-    public User(Guid id, string name, string email)
+    public User(Guid id, string username, string email)
     {
         Id = id.Throw()
             .IfDefault()
             .Value;
 
-        Name = name.Throw()
+        Username = username.Throw()
             .IfEmpty()
             .IfWhiteSpace()
             .Value;

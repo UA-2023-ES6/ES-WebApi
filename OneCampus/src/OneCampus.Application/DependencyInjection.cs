@@ -15,7 +15,10 @@ public static class DependencyInjection
         return services
             .AddScoped<IDateTimeProvider, DateTimeProvider>()
             .AddScoped<IGroupService, GroupService>()
-            .AddScoped<IMessageService, MessageService>();
+            .AddScoped<IMessageService, MessageService>()
+            .AddScoped<IQuestionService, QuestionService>()
+            .AddSingleton<IUsersService, UsersService>()
+            .AddScoped<IAnswerService, AnswerService>();
 
     }
 }

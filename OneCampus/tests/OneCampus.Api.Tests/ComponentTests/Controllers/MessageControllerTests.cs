@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoFixture;
+using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Messages;
@@ -10,6 +12,8 @@ namespace OneCampus.Tests.ComponentTests.Controllers;
 [TestFixture]
 public class MessageControllerTests
 {
+    private readonly Fixture _fixture = new();
+
     private Mock<IMessageService> _mockIMessageService;
 
     private MessageController _controller;
@@ -17,8 +21,7 @@ public class MessageControllerTests
     private readonly CreateMessageRequest request = new CreateMessageRequest
     {
         Content = "Test Message",
-        GroupId = 1,
-        UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87")
+        GroupId = 1
     };
 
     private readonly Message expectedMessage = new Message(1, 1, "Test Message", "User 1", DateTime.UtcNow);
@@ -29,14 +32,16 @@ public class MessageControllerTests
     {
         _mockIMessageService = new Mock<IMessageService>(MockBehavior.Strict);
 
-        _controller = new MessageController(_mockIMessageService.Object);
+        var user = _fixture.Create<UserInfo>();
+
+        _controller = new MessageController(_mockIMessageService.Object, user);
     }
 
     [Test]
     public async Task CreateMessageAsyncTest()
     {
 
-        _mockIMessageService.Setup(s => s.CreateMessageAsync(request.GroupId, request.Content, request.UserId))
+        _mockIMessageService.Setup(s => s.CreateMessageAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<Guid>()))
             .ReturnsAsync(expectedMessage);
 
         var result = await _controller.CreateMessageAsync(request);

@@ -11,6 +11,6 @@ internal static class UserExtensions
             return null;
         }
 
-        return new User(user.Id, user.Name, user.Email);
+        return new User(user.Id, user.Username, user.Email);
     }
 }
