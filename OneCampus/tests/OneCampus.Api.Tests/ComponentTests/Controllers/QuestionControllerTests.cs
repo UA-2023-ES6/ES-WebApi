@@ -18,10 +18,9 @@ public class QuestionControllerTests
     {
         Content = "Test Question",
         GroupId = 1,
-        UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87")
     };
 
-    private readonly Question expectedQuestion = new Question(1, 1, "Test Question", new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87"), DateTime.UtcNow);
+    private readonly Question expectedQuestion = new Question(1, 1, "Test Question", "Manel", DateTime.UtcNow);
 
 
     [SetUp]
@@ -55,12 +54,11 @@ public class QuestionControllerTests
     {
         // Arrange
         int validId = 1;  // Assuming 1 is a valid ID for this test
-        Guid UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87");
         var expected = new List<Question>
         {
-            new Question(1, 1, "Test Question 1", UserId, DateTime.UtcNow.AddMinutes(-2)),
-            new Question(2, 1, "Test Question 2", UserId, DateTime.UtcNow.AddMinutes(-1)),
-            new Question(3, 1, "Test Question 3", UserId, DateTime.UtcNow)
+            new Question(1, 1, "Test Question 1", "Manel", DateTime.UtcNow.AddMinutes(-2)),
+            new Question(2, 1, "Test Question 2", "Manel", DateTime.UtcNow.AddMinutes(-1)),
+            new Question(3, 1, "Test Question 3", "Manel", DateTime.UtcNow)
         };
 
         _mockIQuestionService.Setup(s => s.FindQuestionsByGroupAsync(validId))

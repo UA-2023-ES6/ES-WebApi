@@ -18,10 +18,9 @@ public class AnswerControllerTests
     {
         Content = "Test Answer",
         QuestionId = 1,
-        UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87")
     };
 
-    private readonly Answer expectedAnswer = new Answer(1, 1, "Test Answer", new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87"), DateTime.UtcNow);
+    private readonly Answer expectedAnswer = new Answer(1, 1, "Test Answer", "Manel", DateTime.UtcNow);
 
 
     [SetUp]
@@ -55,12 +54,11 @@ public class AnswerControllerTests
     {
         // Arrange
         int validId = 1;  // Assuming 1 is a valid ID for this test
-        Guid UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87");
         var expected = new List<Answer>
         {
-            new Answer(1, 1, "Test Answer 1", UserId, DateTime.UtcNow.AddMinutes(-2)),
-            new Answer(2, 1, "Test Answer 2", UserId, DateTime.UtcNow.AddMinutes(-1)),
-            new Answer(3, 1, "Test Answer 3", UserId, DateTime.UtcNow)
+            new Answer(1, 1, "Test Answer 1", "Manel", DateTime.UtcNow.AddMinutes(-2)),
+            new Answer(2, 1, "Test Answer 2", "Manel", DateTime.UtcNow.AddMinutes(-1)),
+            new Answer(3, 1, "Test Answer 3", "Manel", DateTime.UtcNow)
         };
 
         _mockIAnswerService.Setup(s => s.FindAnswersByQuestionAsync(validId))

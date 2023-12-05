@@ -37,7 +37,7 @@ public class AnswerRepository : IAnswerRepository
 
             await context.SaveChangesAsync();
 
-            return result.Entity.ToAnswer();
+            return result.Entity.ToAnswer(user.Name);
         }
     }
 
@@ -47,10 +47,10 @@ public class AnswerRepository : IAnswerRepository
         {
             return await context.Answers
                 .AsNoTracking()
-                .Include(item => item.User)
+                .Include(item => item.User) 
                 .Where(m => m.QuestionId == questionId)
                 .OrderBy(item => item.CreateDate)
-                .Select(item => item.ToAnswer()!)
+                .Select(item => item.ToAnswer(item.User.Name)!)
                 .ToListAsync();
         }
     }

@@ -38,7 +38,7 @@ public class QuestionRepository : IQuestionRepository
 
             await context.SaveChangesAsync();
 
-            return result.Entity.ToQuestion();
+            return result.Entity.ToQuestion(user.Name);
         }
     }
 
@@ -51,7 +51,7 @@ public class QuestionRepository : IQuestionRepository
                 .Include(item => item.User)
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(item => item.CreateDate)
-                .Select(item => item.ToQuestion()!)
+                .Select(item => item.ToQuestion(item.User.Name)!)
                 .ToListAsync();
         }
     }
@@ -64,7 +64,7 @@ public class QuestionRepository : IQuestionRepository
                 .AsNoTracking()
                 .FirstOrDefaultAsync(item => item.Id == id);
 
-            return question.ToQuestion();
+            return question.ToQuestion(question.User.Name);
         }
     }
 }
