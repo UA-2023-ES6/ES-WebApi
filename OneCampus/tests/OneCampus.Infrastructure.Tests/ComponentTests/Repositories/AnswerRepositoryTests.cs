@@ -53,7 +53,6 @@ public class AnswerRepositoryTests
         var user = await UserHelper.AddUserAsync(_dbContextFactory);
         var question = await QuestionHelper.AddQuestionAsync(_dbContextFactory, institutionGroup.Id, user.Id);
 
-
         var Answer = await _AnswerRepository.CreateAsync(Content, question.Id, user.Id);
 
         Answer.Should().NotBeNull();
@@ -74,7 +73,6 @@ public class AnswerRepositoryTests
         var user = await UserHelper.AddUserAsync(_dbContextFactory);
 
         var question = await QuestionHelper.AddQuestionAsync(_dbContextFactory, institutionGroup.Id, user.Id);
-
 
         var answer = await _AnswerRepository.CreateAsync(Content, question.Id, Guid.NewGuid());
 
@@ -107,5 +105,3 @@ public class AnswerRepositoryTests
 
     #endregion
 }
-
-

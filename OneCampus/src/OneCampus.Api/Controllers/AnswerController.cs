@@ -50,4 +50,3 @@ public class AnswerController : ControllerBase
         return Ok(new EnumerableResponse<AnswersByQuestionRequest, Answer>(request, answers, answers.Count()));
     }
 }
-

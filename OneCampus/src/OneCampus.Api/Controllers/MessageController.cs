@@ -50,4 +50,3 @@ public class MessageController : ControllerBase
         return Ok(new EnumerableResponse<MessagesByGroupRequest, Message>(request, messages, messages.Count()));
     }
 }
-

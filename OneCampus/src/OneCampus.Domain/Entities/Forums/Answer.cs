@@ -8,7 +8,6 @@ public sealed record Answer
     public string SenderName { get; }
     public DateTime CreateDate { get; }
 
-
     public Answer(int id, int questionId, string content, String senderUserName, DateTime createDate)
     {
         Id = id.Throw()

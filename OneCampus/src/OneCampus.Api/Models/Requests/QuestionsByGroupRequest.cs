@@ -1,10 +1,6 @@
-﻿using System;
-namespace OneCampus.Api.Models.Requests
+﻿namespace OneCampus.Api.Models.Requests;
+
+public class QuestionsByGroupRequest
 {
-    public class QuestionsByGroupRequest
-    {
-        public int GroupId { get; set; }
-    }
-
+    public int GroupId { get; set; }
 }
-

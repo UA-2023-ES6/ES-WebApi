@@ -134,7 +134,7 @@ public class GroupService : IGroupService
         userIdToRemove.Throw()
             .IfDefault();
 
-      var  group = await _groupRepository.RemoveUserAsync(groupId, userIdToRemove);
+        var  group = await _groupRepository.RemoveUserAsync(groupId, userIdToRemove);
         if (group is null)
         {
             throw new NotFoundException("group not found.");

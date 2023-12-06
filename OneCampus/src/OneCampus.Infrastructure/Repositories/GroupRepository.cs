@@ -61,7 +61,7 @@ public class GroupRepository : IGroupRepository
                 .AsNoTracking()
                 .Include(item => item.Users)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == id);
-            
+
             return group is null
                 ? null
                 : group.ToGroupDetais(group.Users.Select(item => item.ToUser()!));
@@ -199,7 +199,7 @@ public class GroupRepository : IGroupRepository
             return await context.Groups
                 .AsNoTracking()
                 .Include(item => item.Users)
-                .AnyAsync(item => item.DeleteDate == null && 
+                .AnyAsync(item => item.DeleteDate == null &&
                     item.Id == groupId &&
                     item.Users.Any(item => item.Id == userId));
         }

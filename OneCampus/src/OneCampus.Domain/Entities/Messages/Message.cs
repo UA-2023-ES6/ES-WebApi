@@ -8,7 +8,6 @@ public sealed record Message
     public string SenderName { get; }
     public DateTime CreateDate { get; }
 
-
     public Message(int id, int groupId, string content, string senderUserName, DateTime createDate)
     {
         Id = id.Throw()

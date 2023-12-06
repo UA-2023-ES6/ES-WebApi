@@ -19,6 +19,5 @@ public static class DependencyInjection
             .AddScoped<IQuestionService, QuestionService>()
             .AddScoped<IUsersService, UsersService>()
             .AddScoped<IAnswerService, AnswerService>();
-
     }
 }

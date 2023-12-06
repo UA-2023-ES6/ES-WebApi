@@ -114,8 +114,4 @@ public class MessageServiceTests
     }
 
     #endregion
-
-
 }
-
-

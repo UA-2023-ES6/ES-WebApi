@@ -22,7 +22,6 @@ public class QuestionController : ControllerBase
     {
         _questionService = questionService.ThrowIfNull().Value;
         _userInfo = userInfo.ThrowIfNull().Value;
-
     }
 
     [HttpPost()]
@@ -51,4 +50,3 @@ public class QuestionController : ControllerBase
         return Ok(new EnumerableResponse<QuestionsByGroupRequest, Question>(request, questions, questions.Count()));
     }
 }
-

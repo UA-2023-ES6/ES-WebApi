@@ -117,7 +117,7 @@ public class QuestionRepositoryTests
 
     [Test]
     public async Task FindAsync_WithQuestionNotFound_ReturnsNull()
-    {   
+    {
         var result = await _questionRepository.FindAsync(1);
 
         result.Should().BeNull();

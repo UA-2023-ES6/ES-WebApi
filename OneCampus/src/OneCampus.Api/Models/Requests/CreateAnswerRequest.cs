@@ -6,4 +6,3 @@ public class CreateAnswerRequest
 
     public int QuestionId { get; set; }
 }
-

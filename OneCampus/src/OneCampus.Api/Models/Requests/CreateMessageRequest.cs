@@ -6,4 +6,3 @@ public class CreateMessageRequest
 
     public int GroupId { get; set; }
 }
-

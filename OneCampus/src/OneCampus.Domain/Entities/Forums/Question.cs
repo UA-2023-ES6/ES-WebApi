@@ -1,6 +1,4 @@
-﻿using OneCampus.Domain.Entities.Users;
-
-namespace OneCampus.Domain.Entities.Forums;
+﻿namespace OneCampus.Domain.Entities.Forums;
 
 public sealed record Question
 {
@@ -9,7 +7,6 @@ public sealed record Question
     public string Content { get; }
     public string SenderName { get; }
     public DateTime CreateDate { get; }
-
 
     public Question(int id, int groupId, string content, String senderUserName, DateTime createDate)
     {

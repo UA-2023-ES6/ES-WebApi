@@ -13,5 +13,4 @@ internal static class AnswerExtensions
 
         return new Answer(Answer.Id, Answer.QuestionId, Answer.Content, senderUserName, Answer.CreateDate);
     }
-
 }

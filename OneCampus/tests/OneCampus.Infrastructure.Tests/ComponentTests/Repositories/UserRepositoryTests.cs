@@ -87,7 +87,6 @@ public class UserRepositoryTests
 
     #endregion
 
-
     #region FindByEmailAsync
 
     [Test]

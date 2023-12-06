@@ -18,7 +18,7 @@ public class GroupControllerTests
 
     private GroupController _controller;
 
-    private  UserInfo userInfo;
+    private UserInfo userInfo;
 
     private readonly CreateGroupRequest request = new CreateGroupRequest
     {

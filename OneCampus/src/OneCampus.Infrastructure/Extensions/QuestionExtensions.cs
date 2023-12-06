@@ -13,5 +13,4 @@ internal static class QuestionExtensions
 
         return new Question(question.Id, question.GroupId, question.Content, senderUserName, question.CreateDate);
     }
-
 }

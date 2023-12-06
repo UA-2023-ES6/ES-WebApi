@@ -28,7 +28,6 @@ public class AnswerControllerTests
 
     private readonly Answer expectedAnswer = new Answer(1, 1, "Test Answer", "Manel", DateTime.UtcNow);
 
-
     [SetUp]
     public void Setup()
     {
@@ -42,7 +41,6 @@ public class AnswerControllerTests
     [Test]
     public async Task CreateAnswerAsyncTest()
     {
-
         _mockIAnswerService.Setup(s => s.CreateAnswerAsync(_user.Id, request.QuestionId, request.Content))
             .ReturnsAsync(expectedAnswer);
 
@@ -90,6 +88,4 @@ public class AnswerControllerTests
         response!.Request.QuestionId.Should().Be(validId);
         response.Data.Should().BeEquivalentTo(expected);
     }
-
 }
-

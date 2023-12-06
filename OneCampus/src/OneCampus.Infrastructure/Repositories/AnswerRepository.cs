@@ -47,7 +47,7 @@ public class AnswerRepository : IAnswerRepository
         {
             return await context.Answers
                 .AsNoTracking()
-                .Include(item => item.User) 
+                .Include(item => item.User)
                 .Where(m => m.QuestionId == questionId)
                 .OrderBy(item => item.CreateDate)
                 .Select(item => item.ToAnswer(item.User.Username)!)
