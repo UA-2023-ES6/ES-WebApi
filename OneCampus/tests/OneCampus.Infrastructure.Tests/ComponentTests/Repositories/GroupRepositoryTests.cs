@@ -164,10 +164,10 @@ public class GroupRepositoryTests
                 .With(item => item.DeleteDate));
         var dbGroup3 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup2.Id, user.Id);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup2.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
 
         var groups = await _groupRepository.GetSubGroupsAsync(user.Id, dbGroupWithInstitution.Id);
 
@@ -184,12 +184,12 @@ public class GroupRepositoryTests
 
         var dbGroupWithInstitution = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
         var dbGroup = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
-        var dbGroup2 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);      
+        var dbGroup2 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
         var dbGroup3 = await GroupHelper.AddGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id);
 
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroupWithInstitution.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup.Id, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup3.Id, user.Id);
 
         var groups = await _groupRepository.GetSubGroupsAsync(user.Id, dbGroupWithInstitution.Id);
 
@@ -268,6 +268,71 @@ public class GroupRepositoryTests
         group.Users.Should().NotBeNullOrEmpty()
             .And.Contain(user => user.Id == bdUser2.Id)
             .And.NotContain(user => user.Id == bdUser.Id);
+    }
+
+    #endregion
+
+    #region GetUsersAsync
+
+    [Test]
+    public async Task GetUsersAsync_UserWithAccess_ReturnsTrue()
+    {
+        var user1 = await UserHelper.AddUserAsync(_dbContextFactory);
+        var user2 = await UserHelper.AddUserAsync(_dbContextFactory);
+        var user3 = await UserHelper.AddUserAsync(_dbContextFactory);
+
+        var dbGroup = _fixture.Build<Database.Group>()
+            .Without(item => item.ParentId)
+            .Without(item => item.Institution)
+            .Without(item => item.DeleteDate)
+            .Create();
+
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
+        {
+            var result = await dbContext.Groups.AddAsync(dbGroup);
+
+            await dbContext.SaveChangesAsync();
+
+            dbGroup = result.Entity;
+        }
+
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbGroup.Id, user1.Id, user2.Id, user3.Id);
+
+        var (results, totalResults) = await _groupRepository.GetUsersAsync(dbGroup.Id, 10, 1);
+
+        results.Should().NotBeNullOrEmpty()
+            .And.HaveCount(2);
+        totalResults.Should().Be(3);
+    }
+
+    #endregion
+
+    #region IsUserInTheGroupAsync
+
+    [Test]
+    public async Task IsUserInTheGroupAsync_UserWithAccess_ReturnsTrue()
+    {
+        var institutionGroup = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var group = await GroupHelper.AddGroupAsync(_dbContextFactory, institutionGroup.Id);
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, group.Id, user.Id);
+
+        var result = await _groupRepository.HasAccessAsync(user.Id, group.Id);
+
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task IsUserInTheGroupAsync_UserWithoutAccess_ReturnsFalse()
+    {
+        var institutionGroup = await GroupHelper.AddGroupWithInstitutionAsync(_dbContextFactory);
+        var group = await GroupHelper.AddGroupAsync(_dbContextFactory, institutionGroup.Id);
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+
+        var result = await _groupRepository.HasAccessAsync(user.Id, group.Id);
+
+        result.Should().BeFalse();
     }
 
     #endregion

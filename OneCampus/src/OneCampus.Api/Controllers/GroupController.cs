@@ -58,7 +58,7 @@ public class GroupController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<GroupByIdRequest, Group>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<GroupByIdRequest, GroupDetails>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,7 +71,7 @@ public class GroupController : ControllerBase
             Id = id
         };
 
-        return Ok(new BaseResponse<GroupByIdRequest, Group>(request, group));
+        return Ok(new BaseResponse<GroupByIdRequest, GroupDetails>(request, group));
     }
 
     [HttpDelete("{id}")]
@@ -111,7 +111,7 @@ public class GroupController : ControllerBase
     }
 
     [HttpPost("{id}/user/{userId}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<UserRequest, Group>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<UserRequest, GroupDetails>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -125,11 +125,11 @@ public class GroupController : ControllerBase
             UserId = userId
         };
 
-        return Ok(new BaseResponse<UserRequest, Group>(request, group));
+        return Ok(new BaseResponse<UserRequest, GroupDetails>(request, group));
     }
 
     [HttpDelete("{id}/user/{userId}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<UserRequest, Group>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<UserRequest, GroupDetails>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -143,6 +143,6 @@ public class GroupController : ControllerBase
             UserId = userId
         };
 
-        return Ok(new BaseResponse<UserRequest, Group>(request, group));
+        return Ok(new BaseResponse<UserRequest, GroupDetails>(request, group));
     }
 }

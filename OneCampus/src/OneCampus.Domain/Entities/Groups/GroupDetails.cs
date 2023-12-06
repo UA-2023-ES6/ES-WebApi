@@ -1,13 +1,15 @@
 ﻿namespace OneCampus.Domain.Entities.Groups;
 
-public sealed record Group
+public sealed record GroupDetails
 {
     public int Id { get; }
     public string Name { get; }
 
+    public IList<User> Users { get; }
+
     public IList<Group> SubGroup { get; } = new List<Group>();
 
-    public Group(int id, string name)
+    public GroupDetails(int id, string name, List<User> users)
     {
         Id = id.Throw()
             .IfLessThan(0)
@@ -17,5 +19,7 @@ public sealed record Group
             .IfEmpty()
             .IfWhiteSpace()
             .Value;
+
+        Users = users.ThrowIfNull().Value;
     }
 }

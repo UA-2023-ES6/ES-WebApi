@@ -67,10 +67,10 @@ public static class GroupHelper
         }
     }
 
-    public static async Task AddUserToGroupAsync(
-        IDbContextFactory<OneCampusDbContext> dbContextFactory,
-        int groupId,
-        Guid userId)
+    public static async Task AddUsersToGroupAsync(
+    IDbContextFactory<OneCampusDbContext> dbContextFactory,
+    int groupId,
+    params Guid[] usersIds)
     {
         using (var dbContext = await dbContextFactory.CreateDbContextAsync())
         {
@@ -78,9 +78,12 @@ public static class GroupHelper
                 .Include(item => item.Users)
                 .FirstAsync(item => item.Id == groupId);
 
-            var user = await dbContext.Users.FindAsync(userId);
+            foreach (var userId in usersIds)
+            {
+                var user = await dbContext.Users.FindAsync(userId);
 
-            group.Users.Add(user!);
+                group.Users.Add(user!);
+            }
 
             await dbContext.SaveChangesAsync();
         }

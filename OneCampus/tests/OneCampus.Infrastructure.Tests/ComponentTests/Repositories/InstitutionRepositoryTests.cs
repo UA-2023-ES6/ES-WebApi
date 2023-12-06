@@ -62,7 +62,7 @@ public class InstitutionRepositoryTests
         }
 
         var user = await UserHelper.AddUserAsync(_dbContextFactory);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
 
         var institution = await _institutionRepository.FindAsync(dbInstitution.Id);
 
@@ -87,7 +87,7 @@ public class InstitutionRepositoryTests
         }
 
         var user = await UserHelper.AddUserAsync(_dbContextFactory);
-        await GroupHelper.AddUserToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
 
         var institution = await _institutionRepository.FindAsync(dbInstitution.Id);
 

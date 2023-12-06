@@ -14,14 +14,14 @@ internal static class GroupExtensions
         return new Group(group.Id, group.Name);
     }
 
-    internal static Group? ToGroup(this Database.Group? group, IEnumerable<User> users)
+    internal static GroupDetails? ToGroupDetais(this Database.Group? group, IEnumerable<User> users)
     {
         if (group is null)
         {
             return null;
         }
 
-        return new Group(group.Id, group.Name, users.ToList());
+        return new GroupDetails(group.Id, group.Name, users.ToList());
     }
 
     internal static User? ToUser(this Database.User? user)

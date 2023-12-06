@@ -111,7 +111,7 @@ public class GroupControllerTests
     {
         // Arrange
         int validId = 1;  // Assuming 1 is a valid ID for this test
-        var expected = new Group(1, "TestGroup");
+        var expected =  _fixture.Create<GroupDetails>();
 
         _mockIGroupService.Setup(s => s.FindGroupAsync(userInfo.Id, validId))
             .ReturnsAsync(expected);
@@ -124,7 +124,7 @@ public class GroupControllerTests
             .And.BeOfType<OkObjectResult>();
 
         var okResult = result as OkObjectResult;
-        var response = okResult!.Value as BaseResponse<GroupByIdRequest, Group>;
+        var response = okResult!.Value as BaseResponse<GroupByIdRequest, GroupDetails>;
 
         response.Should().NotBeNull();
         response!.Request.Id.Should().Be(validId);
@@ -157,12 +157,44 @@ public class GroupControllerTests
     }
 
     [Test]
+    public async Task GetUsersAsyncTest()
+    {
+        // Arrange
+        int id = 10;
+        int take = 10;
+        int skip = 1;
+        var expectedResults = _fixture.CreateMany<User>(3);
+        var expectedTotalResults = 10;
+
+        _mockIGroupService.Setup(s => s.GetUsersAsync(userInfo.Id, id, take, skip))
+            .ReturnsAsync((expectedResults, expectedTotalResults));
+
+        // Act
+        var result = await _controller.GetUsersAsync(id, take, skip);
+
+        // Assert
+        result.Should().NotBeNull()
+            .And.BeOfType<OkObjectResult>();
+
+        var okResult = result as OkObjectResult;
+        var response = okResult!.Value as EnumerableResponse<UsersRequest, User>;
+
+        response.Should().NotBeNull();
+        response!.Request.Id.Should().Be(id);
+        response.Request.Take.Should().Be(take);
+        response.Request.Skip.Should().Be(skip);
+        response.Data.Should().NotBeNullOrEmpty()
+            .And.BeEquivalentTo(expectedResults);
+        response.TotalResults.Should().Be(expectedTotalResults);
+    }
+
+    [Test]
     public async Task AddUserAsyncTest()
     {
         // Arrange
         int validGroupId = 1;  // Sample Group ID
         Guid validUserId = Guid.NewGuid();  // Sample User ID
-        var expected = new Group(1, "TestGroup");
+        var expected = _fixture.Create<GroupDetails>();
 
         _mockIGroupService.Setup(s => s.AddUserAsync(userInfo.Id, validGroupId, validUserId))
             .ReturnsAsync(expected);
@@ -175,7 +207,7 @@ public class GroupControllerTests
             .And.BeOfType<OkObjectResult>();
 
         var okResult = result as OkObjectResult;
-        var response = okResult!.Value as BaseResponse<UserRequest, Group>;
+        var response = okResult!.Value as BaseResponse<UserRequest, GroupDetails>;
 
         response.Should().NotBeNull();
         response!.Request.GroupId.Should().Be(validGroupId);
@@ -188,10 +220,7 @@ public class GroupControllerTests
     {
         int validGroupId = 1;  // Sample Group ID
         Guid validUserId = Guid.NewGuid();  // Sample User ID
-        var expectedGroupAfterRemoval = new Group(1, "TestGroup");
-        {
-            // ... mock a group, e.g., Id = 1, Name = "Updated Group", ...
-        };
+        var expectedGroupAfterRemoval = _fixture.Create<GroupDetails>();
 
         _mockIGroupService.Setup(s => s.RemoveUserAsync(userInfo.Id, validGroupId, validUserId))
             .ReturnsAsync(expectedGroupAfterRemoval);
@@ -204,7 +233,7 @@ public class GroupControllerTests
             .And.BeOfType<OkObjectResult>();
 
         var okResult = result as OkObjectResult;
-        var response = okResult!.Value as BaseResponse<UserRequest, Group>;
+        var response = okResult!.Value as BaseResponse<UserRequest, GroupDetails>;
 
         response.Should().NotBeNull();
         response!.Request.GroupId.Should().Be(validGroupId);

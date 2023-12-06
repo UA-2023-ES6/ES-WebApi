@@ -74,7 +74,7 @@ public class GroupService : IGroupService
         return groups;
     }
 
-    public async Task<Group> FindGroupAsync(Guid userId, int id)
+    public async Task<GroupDetails> FindGroupAsync(Guid userId, int id)
     {
         await ValidateGroupAccessAsync(userId, id);
 
@@ -94,7 +94,7 @@ public class GroupService : IGroupService
         return await _groupRepository.DeleteAsync(id);
     }
 
-    public async Task<Group> AddUserAsync(Guid userId, int groupId, Guid userIdToAdd)
+    public async Task<GroupDetails> AddUserAsync(Guid userId, int groupId, Guid userIdToAdd)
     {
         await ValidateGroupAccessAsync(userId, groupId);
 
@@ -127,7 +127,7 @@ public class GroupService : IGroupService
         return group;
     }
 
-    public async Task<Group> RemoveUserAsync(Guid userId, int groupId, Guid userIdToRemove)
+    public async Task<GroupDetails> RemoveUserAsync(Guid userId, int groupId, Guid userIdToRemove)
     {
         await ValidateGroupAccessAsync(userId, groupId);
 
@@ -184,7 +184,7 @@ public class GroupService : IGroupService
         groupId.Throw()
             .IfNegativeOrZero();
 
-        var isUserInTheGroup = await _groupRepository.IsUserInTheGroupAsync(userId, groupId);
+        var isUserInTheGroup = await _groupRepository.HasAccessAsync(userId, groupId);
         if (!isUserInTheGroup)
         {
             throw new ForbiddenException("the user does not have access to the group");

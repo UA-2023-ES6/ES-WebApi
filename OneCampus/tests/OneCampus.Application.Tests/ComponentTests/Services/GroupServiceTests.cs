@@ -25,7 +25,7 @@ public class GroupServiceTests
 
         _service = new GroupService(_mockGroupRepository.Object, _mockUserRepository.Object, _mockInstitutionRepository.Object);
 
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(true);
     }
 
@@ -35,13 +35,13 @@ public class GroupServiceTests
     public async Task CreateGroupAsync_CreateGroup_ReturnsTheNewGroup()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         _mockGroupRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(Fixture.Create<Group>());
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         var result = await _service.CreateGroupAsync(Guid.NewGuid(), "name", 1);
 
@@ -51,7 +51,7 @@ public class GroupServiceTests
     [Test]
     public async Task CreateGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.CreateGroupAsync(Guid.NewGuid(), "name", 1))
@@ -86,7 +86,7 @@ public class GroupServiceTests
     [Test]
     public async Task UpdateGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.UpdateGroupAsync(Guid.NewGuid(), 1, "new name"))
@@ -122,7 +122,7 @@ public class GroupServiceTests
     public async Task FindGroupAsync_FindGroup_ReturnsTheGroup()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         var result = await _service.FindGroupAsync(Guid.NewGuid(), 1);
 
@@ -133,7 +133,7 @@ public class GroupServiceTests
     public async Task FindGroupAsync_WithGroupNotFound_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Group?)null);
+            .ReturnsAsync((GroupDetails?)null);
 
         await _service.Invoking(s => s.FindGroupAsync(Guid.NewGuid(), 1))
             .Should().ThrowAsync<NotFoundException>();
@@ -142,7 +142,7 @@ public class GroupServiceTests
     [Test]
     public async Task FindGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.FindGroupAsync(Guid.NewGuid(), 1))
@@ -167,7 +167,7 @@ public class GroupServiceTests
     [Test]
     public async Task DeleteGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.DeleteGroupAsync(Guid.NewGuid(), 1))
@@ -182,13 +182,13 @@ public class GroupServiceTests
     public async Task AddUserAsync_AddUserToGroup_ReturnsTheGroup()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         _mockUserRepository.Setup(item => item.FindAsync(It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         var result = await _service.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid());
 
@@ -199,13 +199,13 @@ public class GroupServiceTests
     public async Task AddUserAsync_WithGroupNotFound_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Group?)null);
+            .ReturnsAsync((GroupDetails?)null);
 
         _mockUserRepository.Setup(item => item.FindAsync(It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         await _service.Invoking(s => s.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
             .Should().ThrowAsync<NotFoundException>();
@@ -215,13 +215,13 @@ public class GroupServiceTests
     public async Task AddUserAsync_WithUserNotFound_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         _mockUserRepository.Setup(item => item.FindAsync(It.IsAny<Guid>()))
             .ReturnsAsync((Domain.Entities.Users.User?)null);
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         await _service.Invoking(s => s.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
             .Should().ThrowAsync<NotFoundException>();
@@ -231,13 +231,13 @@ public class GroupServiceTests
     public async Task AddUserAsync_WithGroupToUpdateNotFound_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         _mockUserRepository.Setup(item => item.FindAsync(It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync((Group?)null);
+            .ReturnsAsync((GroupDetails?)null);
 
         await _service.Invoking(s => s.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
             .Should().ThrowAsync<NotFoundException>();
@@ -246,7 +246,7 @@ public class GroupServiceTests
     [Test]
     public async Task AddUserAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
@@ -263,7 +263,7 @@ public class GroupServiceTests
         var userId = Guid.NewGuid();
 
         var group = Fixture
-                .Build<Group>()
+                .Build<GroupDetails>()
                 .Create();
         group.Users.Add(new User(userId, "name", "email"));
 
@@ -271,7 +271,7 @@ public class GroupServiceTests
             .ReturnsAsync(group);
 
         _mockGroupRepository.Setup(item => item.RemoveUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync(Fixture.Create<Group>());
+            .ReturnsAsync(Fixture.Create<GroupDetails>());
 
         var result = await _service.RemoveUserAsync(Guid.NewGuid(), 1, userId);
 
@@ -284,7 +284,7 @@ public class GroupServiceTests
         var userId = Guid.NewGuid();
 
         var group = Fixture
-                .Build<Group>()
+                .Build<GroupDetails>()
                 .Create();
         group.Users.Add(new User(userId, "name", "email"));
 
@@ -292,7 +292,7 @@ public class GroupServiceTests
             .ReturnsAsync(group);
 
         _mockGroupRepository.Setup(item => item.RemoveUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
-            .ReturnsAsync((Group?)null);
+            .ReturnsAsync((GroupDetails?)null);
 
         await _service.Invoking(s => s.RemoveUserAsync(Guid.NewGuid(), 1, userId))
             .Should().ThrowAsync<NotFoundException>();
@@ -301,7 +301,7 @@ public class GroupServiceTests
     [Test]
     public async Task RemoveUserAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.RemoveUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))

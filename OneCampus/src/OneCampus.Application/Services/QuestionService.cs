@@ -65,7 +65,7 @@ public class QuestionService : IQuestionService
         groupId.Throw()
             .IfNegativeOrZero();
 
-        var isUserInTheGroup = await _groupRepository.IsUserInTheGroupAsync(userId, groupId);
+        var isUserInTheGroup = await _groupRepository.HasAccessAsync(userId, groupId);
         if (!isUserInTheGroup)
         {
             throw new ForbiddenException("the user does not have access to the group");

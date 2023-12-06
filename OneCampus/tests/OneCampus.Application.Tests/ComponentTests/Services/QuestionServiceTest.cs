@@ -25,7 +25,7 @@ public class QuestionServiceTests
 
         _service = new QuestionService(_mockQuestionRepository.Object, _mockUserRepository.Object, _mockGroupRepository.Object);
 
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(true);
     }
 
@@ -38,7 +38,7 @@ public class QuestionServiceTests
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockQuestionRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Question>());
@@ -55,7 +55,7 @@ public class QuestionServiceTests
             .ReturnsAsync((Domain.Entities.Users.User?)null);
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockQuestionRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Question>());
@@ -71,7 +71,7 @@ public class QuestionServiceTests
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Domain.Entities.Groups.Group?)null);
+            .ReturnsAsync((Domain.Entities.Groups.GroupDetails?)null);
 
         _mockQuestionRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Question>());
@@ -83,7 +83,7 @@ public class QuestionServiceTests
     [Test]
     public async Task CreateQuestionAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.CreateQuestionAsync(Guid.NewGuid(), 1, "Test Question"))
@@ -102,7 +102,7 @@ public class QuestionServiceTests
             .ToList();
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockQuestionRepository.Setup(item => item.GetQuestionsByGroupAsync(It.IsAny<int>()))
             .ReturnsAsync(Questions);
@@ -117,7 +117,7 @@ public class QuestionServiceTests
     public async Task FindQuestionsByGroupAsync_WithNullGroup_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Domain.Entities.Groups.Group?)null);
+            .ReturnsAsync((Domain.Entities.Groups.GroupDetails?)null);
 
         await _service.Invoking(s => s.FindQuestionsByGroupAsync(Guid.NewGuid(), 1))
             .Should().ThrowAsync<NotFoundException>();
@@ -126,7 +126,7 @@ public class QuestionServiceTests
     [Test]
     public async Task FindQuestionsByGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
-        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+        _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
 
         await _service.Invoking(s => s.FindQuestionsByGroupAsync(Guid.NewGuid(), 1))

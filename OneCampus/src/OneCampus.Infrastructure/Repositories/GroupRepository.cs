@@ -53,7 +53,7 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<Group?> FindAsync(int id)
+    public async Task<GroupDetails?> FindAsync(int id)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -61,8 +61,10 @@ public class GroupRepository : IGroupRepository
                 .AsNoTracking()
                 .Include(item => item.Users)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == id);
-
-            return group.ToGroup();
+            
+            return group is null
+                ? null
+                : group.ToGroupDetais(group.Users.Select(item => item.ToUser()!));
         }
     }
 
@@ -120,7 +122,7 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<Group?> AddUserAsync(int groupId, Guid userId)
+    public async Task<GroupDetails?> AddUserAsync(int groupId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -140,11 +142,11 @@ public class GroupRepository : IGroupRepository
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroup(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
         }
     }
 
-    public async Task<Group?> RemoveUserAsync(int groupId, Guid userId)
+    public async Task<GroupDetails?> RemoveUserAsync(int groupId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -164,7 +166,7 @@ public class GroupRepository : IGroupRepository
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroup(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
         }
     }
 
@@ -190,7 +192,7 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<bool> IsUserInTheGroupAsync(Guid userId, int groupId)
+    public async Task<bool> HasAccessAsync(Guid userId, int groupId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
