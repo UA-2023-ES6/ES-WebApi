@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoFixture;
+using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Forums;
@@ -10,9 +12,13 @@ namespace OneCampus.Tests.ComponentTests.Controllers;
 [TestFixture]
 public class QuestionControllerTests
 {
+    private readonly Fixture _fixture = new();
+
     private Mock<IQuestionService> _mockIQuestionService;
 
     private QuestionController _controller;
+
+    private UserInfo _user;
 
     private readonly CreateQuestionRequest request = new CreateQuestionRequest
     {
@@ -28,14 +34,16 @@ public class QuestionControllerTests
     {
         _mockIQuestionService = new Mock<IQuestionService>(MockBehavior.Strict);
 
-        _controller = new QuestionController(_mockIQuestionService.Object);
+        _user = _fixture.Create<UserInfo>();
+
+        _controller = new QuestionController(_mockIQuestionService.Object, _user);
     }
 
     [Test]
     public async Task CreateQuestionAsyncTest()
     {
 
-        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(request.GroupId, request.Content, request.UserId))
+        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(request.GroupId, request.Content, _user.Id))
             .ReturnsAsync(expectedQuestion);
 
         var result = await _controller.CreateQuestionAsync(request);

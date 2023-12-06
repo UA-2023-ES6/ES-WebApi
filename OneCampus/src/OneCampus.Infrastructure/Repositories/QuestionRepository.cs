@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneCampus.Domain.Entities.Forums;
-using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Repositories;
 using OneCampus.Infrastructure.Data;
 using Database = OneCampus.Infrastructure.Data.Entities;
@@ -38,7 +37,7 @@ public class QuestionRepository : IQuestionRepository
 
             await context.SaveChangesAsync();
 
-            return result.Entity.ToQuestion(user.Name);
+            return result.Entity.ToQuestion(user.Username);
         }
     }
 
@@ -51,7 +50,7 @@ public class QuestionRepository : IQuestionRepository
                 .Include(item => item.User)
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(item => item.CreateDate)
-                .Select(item => item.ToQuestion(item.User.Name)!)
+                .Select(item => item.ToQuestion(item.User.Username)!)
                 .ToListAsync();
         }
     }
@@ -61,10 +60,11 @@ public class QuestionRepository : IQuestionRepository
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var question = await context.Questions
+                .Include(item => item.User)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(item => item.Id == id);
 
-            return question.ToQuestion(question.User.Name);
+            return question?.ToQuestion(question.User.Username);
         }
     }
 }
