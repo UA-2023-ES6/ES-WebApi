@@ -4,9 +4,9 @@ namespace OneCampus.Domain.Services;
 
 public interface IQuestionService
 {
-    Task<Question?> CreateQuestionAsync(int groupId, string content, Guid userId);
+    Task<Question?> CreateQuestionAsync(Guid userId, int groupId, string content);
 
-    Task<IEnumerable<Question>> FindQuestionsByGroupAsync(int groupId);
+    Task<IEnumerable<Question>> FindQuestionsByGroupAsync(Guid userId, int groupId);
 
 
 }

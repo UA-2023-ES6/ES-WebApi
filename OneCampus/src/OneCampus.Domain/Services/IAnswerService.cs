@@ -4,9 +4,9 @@ namespace OneCampus.Domain.Services;
 
 public interface IAnswerService
 {
-    Task<Answer?> CreateAnswerAsync(int questionId, string content, Guid userId);
+    Task<Answer?> CreateAnswerAsync(Guid userId, int questionId, string content);
 
-    Task<IEnumerable<Answer>> FindAnswersByQuestionAsync(int questionId);
+    Task<IEnumerable<Answer>> FindAnswersByQuestionAsync(Guid userId, int questionId);
 
 
 }

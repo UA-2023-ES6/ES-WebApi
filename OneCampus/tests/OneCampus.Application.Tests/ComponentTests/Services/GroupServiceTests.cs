@@ -49,7 +49,7 @@ public class GroupServiceTests
     }
 
     [Test]
-    public async Task CreateGroupAsync_WithParentNotFound_ThrowsForbiddenException()
+    public async Task CreateGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
     {
         _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(false);
@@ -81,6 +81,16 @@ public class GroupServiceTests
 
         await _service.Invoking(s => s.UpdateGroupAsync(Guid.NewGuid(), 1, "new name"))
             .Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Test]
+    public async Task UpdateGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
+    {
+        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(false);
+
+        await _service.Invoking(s => s.UpdateGroupAsync(Guid.NewGuid(), 1, "new name"))
+            .Should().ThrowAsync<ForbiddenException>();
     }
 
     #endregion
@@ -129,6 +139,16 @@ public class GroupServiceTests
             .Should().ThrowAsync<NotFoundException>();
     }
 
+    [Test]
+    public async Task FindGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
+    {
+        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(false);
+
+        await _service.Invoking(s => s.FindGroupAsync(Guid.NewGuid(), 1))
+            .Should().ThrowAsync<ForbiddenException>();
+    }
+
     #endregion
 
     #region DeleteGroupAsync
@@ -142,6 +162,16 @@ public class GroupServiceTests
         var result = await _service.DeleteGroupAsync(Guid.NewGuid(), 1);
 
         result.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task DeleteGroupAsync_WithoutAccessFound_ThrowsForbiddenException()
+    {
+        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(false);
+
+        await _service.Invoking(s => s.DeleteGroupAsync(Guid.NewGuid(), 1))
+            .Should().ThrowAsync<ForbiddenException>();
     }
 
     #endregion
@@ -213,6 +243,16 @@ public class GroupServiceTests
             .Should().ThrowAsync<NotFoundException>();
     }
 
+    [Test]
+    public async Task AddUserAsync_WithoutAccessFound_ThrowsForbiddenException()
+    {
+        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(false);
+
+        await _service.Invoking(s => s.AddUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
+            .Should().ThrowAsync<ForbiddenException>();
+    }
+
     #endregion
 
     #region RemoveUserAsync
@@ -256,6 +296,16 @@ public class GroupServiceTests
 
         await _service.Invoking(s => s.RemoveUserAsync(Guid.NewGuid(), 1, userId))
             .Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Test]
+    public async Task RemoveUserAsync_WithoutAccessFound_ThrowsForbiddenException()
+    {
+        _mockGroupRepository.Setup(item => item.IsUserInTheGroupAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(false);
+
+        await _service.Invoking(s => s.RemoveUserAsync(Guid.NewGuid(), 1, Guid.NewGuid()))
+            .Should().ThrowAsync<ForbiddenException>();
     }
 
     #endregion

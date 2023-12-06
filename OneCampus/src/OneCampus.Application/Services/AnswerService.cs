@@ -21,8 +21,10 @@ public class AnswerService : IAnswerService
         _questionRepository = questionRepository.ThrowIfNull().Value;
     }
 
-    public async Task<Answer?> CreateAnswerAsync(int questionId, string content, Guid userId)
+    public async Task<Answer?> CreateAnswerAsync(Guid userId, int questionId, string content)
     {
+        await ValidateQuestionAccessAsync(userId, questionId);
+
         content.Throw()
             .IfEmpty()
             .IfWhiteSpace();
@@ -45,8 +47,10 @@ public class AnswerService : IAnswerService
         return await _AnswerRepository.CreateAsync(content, questionId, userId);
     }
 
-    public async Task<IEnumerable<Answer>> FindAnswersByQuestionAsync(int questionId)
+    public async Task<IEnumerable<Answer>> FindAnswersByQuestionAsync(Guid userId, int questionId)
     {
+        await ValidateQuestionAccessAsync(userId, questionId);
+
         questionId.Throw()
             .IfNegativeOrZero();
 
@@ -57,5 +61,20 @@ public class AnswerService : IAnswerService
         }
 
         return await _AnswerRepository.GetAnswersByQuestionAsync(questionId);
+    }
+
+    private async Task ValidateQuestionAccessAsync(Guid userId, int groupId)
+    {
+        userId.Throw()
+            .IfDefault();
+
+        groupId.Throw()
+            .IfNegativeOrZero();
+
+        var userHasAccess = await _questionRepository.HasAccessAsync(userId, groupId);
+        if (!userHasAccess)
+        {
+            throw new ForbiddenException("the user does not have access to the question");
+        }
     }
 }

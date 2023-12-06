@@ -10,4 +10,6 @@ public interface IQuestionRepository
 
     Task<Question?> FindAsync(int id);
 
+    Task<bool> HasAccessAsync(Guid userId, int questionId);
+
 }
