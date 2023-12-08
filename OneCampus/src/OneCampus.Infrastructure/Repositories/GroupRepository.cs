@@ -59,12 +59,13 @@ public class GroupRepository : IGroupRepository
         {
             var group = await context.Groups
                 .AsNoTracking()
-                .Include(item => item.Users)
+                .Include(item => item.UserGroups)
+                .ThenInclude(item => item.User)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == id);
 
             return group is null
                 ? null
-                : group.ToGroupDetais(group.Users.Select(item => item.ToUser()!));
+                : group.ToGroupDetais(group.UserGroups.Select(item => item.User.ToUser()!));
         }
     }
 
@@ -90,7 +91,7 @@ public class GroupRepository : IGroupRepository
                 .AsNoTracking()
                 .Where(item => item.DeleteDate == null &&
                     item.ParentId == id &&
-                    item.Users.Any(item => item.Id == userId))
+                    item.UserGroups.Any(item => item.UserId == userId))
                 .ToListAsync();
 
             return groups.Select(group => group.ToGroup()!);
@@ -127,7 +128,7 @@ public class GroupRepository : IGroupRepository
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var group = await context.Groups
-                .Include(item => item.Users)
+                .Include(item => item.UserGroups)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == groupId);
             if (group == null)
             {
@@ -137,12 +138,18 @@ public class GroupRepository : IGroupRepository
             var newUser = await context.Users.FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == userId);
             if (newUser is not null)
             {
-                group.Users.Add(newUser);
+                var userGroup = new Database.UserGroup
+                {
+                    Group = group,
+                    User = newUser
+                };
+
+                group.UserGroups.Add(userGroup);
 
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.UserGroups.Select(item => item.User.ToUser()!))!;
         }
     }
 
@@ -151,22 +158,23 @@ public class GroupRepository : IGroupRepository
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var group = await context.Groups
-                .Include(item => item.Users)
+                .Include(item => item.UserGroups)
+                .ThenInclude(item => item.User)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == groupId);
             if (group == null)
             {
                 return null;
             }
 
-            var userToRemove = group.Users.FirstOrDefault(item => item.Id == userId);
-            if (userToRemove is not null)
+            var userGroupToRemove = group.UserGroups.FirstOrDefault(item => item.UserId == userId);
+            if (userGroupToRemove is not null)
             {
-                group.Users.Remove(userToRemove);
+                context.Remove(userGroupToRemove);
 
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.UserGroups.Select(item => item.User.ToUser()!))!;
         }
     }
 
@@ -174,7 +182,7 @@ public class GroupRepository : IGroupRepository
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
-            var query = context.Users.Where(item => item.DeleteDate == null && item.Groups.Any(item => item.Id == id));
+            var query = context.Users.Where(item => item.DeleteDate == null && item.UserGroups.Any(item => item.GroupId == id));
 
             var totalResults = await query.CountAsync();
             if (totalResults == 0)
@@ -198,10 +206,10 @@ public class GroupRepository : IGroupRepository
         {
             return await context.Groups
                 .AsNoTracking()
-                .Include(item => item.Users)
+                .Include(item => item.UserGroups)
                 .AnyAsync(item => item.DeleteDate == null &&
                     item.Id == groupId &&
-                    item.Users.Any(item => item.Id == userId));
+                    item.UserGroups.Any(item => item.UserId == userId));
         }
     }
 }

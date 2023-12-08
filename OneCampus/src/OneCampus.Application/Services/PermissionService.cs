@@ -1,4 +1,5 @@
-﻿using OneCampus.Domain.Entities.Permissions;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Permissions;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Domain.Services;
@@ -11,14 +12,14 @@ namespace OneCampus.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IGroupRepository _groupRepository;
 
-        public PermissionService(IPermissionRepository permissionRepository,IUserRepository userRepository,IGroupRepository groupRepository) 
+        public PermissionService(IPermissionRepository permissionRepository, IUserRepository userRepository, IGroupRepository groupRepository)
         {
             _permissionRepository = permissionRepository.ThrowIfNull().Value;
             _userRepository = userRepository.ThrowIfNull().Value;
             _groupRepository = groupRepository.ThrowIfNull().Value;
         }
 
-        public async Task<UserPermissions> AllowPermissionAsync(Guid userID, int groupID, Permissions permission)
+        public async Task<UserPermissions> AllowPermissionAsync(Guid userID, int groupID, PermissionType permission)
         {
             userID.Throw().IfDefault();
             var user = await _userRepository.FindAsync(userID);
@@ -29,7 +30,7 @@ namespace OneCampus.Application.Services
 
             groupID.Throw().IfNegativeOrZero();
             var group = await _groupRepository.FindAsync(groupID);
-            if(group == null)
+            if (group == null)
             {
                 throw new NotFoundException("Group not found");
             }
@@ -57,7 +58,7 @@ namespace OneCampus.Application.Services
             return await _permissionRepository.DeleteAsync(userID, groupID);
         }
 
-        public async Task<UserPermissions> DenyPermissionAsync(Guid userID, int groupID, Permissions permission)
+        public async Task<UserPermissions> DenyPermissionAsync(Guid userID, int groupID, PermissionType permission)
         {
             userID.Throw().IfDefault();
             groupID.Throw().IfNegativeOrZero();
@@ -95,7 +96,7 @@ namespace OneCampus.Application.Services
             }
 
             var permissions = await _permissionRepository.GetPermissions(userID, groupID);
-            if(permissions == null) 
+            if (permissions == null)
             {
                 throw new NotFoundException("No permissions found");
             }

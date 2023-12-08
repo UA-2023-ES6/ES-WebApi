@@ -1,4 +1,5 @@
 ﻿using AutoFixture.Dsl;
+using OneCampus.Infrastructure.Data.Entities;
 
 namespace OneCampus.Infrastructure.Tests.ComponentTests.Repositories;
 
@@ -138,7 +139,15 @@ public class InstitutionRepositoryTests
         var dbInstitutionGroup = _fixture.Build<Database.Group>()
             .Without(item => item.Id)
             .Without(item => item.ParentId)
-            .With(item => item.Users, user is null ? null : new List<Database.User> { user })
+            .With(item => item.UserGroups, user is null
+                ? null
+                : new List<Database.UserGroup>
+                {
+                    new UserGroup
+                    {
+                        User = user
+                    }
+                })
             .Create();
 
         return _fixture.Build<Database.Institution>()

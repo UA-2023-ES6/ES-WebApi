@@ -255,8 +255,14 @@ public class GroupRepositoryTests
         using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Groups.FindAsync(dbGroup.Id);
-            result!.Users.Add(bdUser);
-            result!.Users.Add(bdUser2);
+            result!.UserGroups.Add(new Data.Entities.UserGroup
+            {
+                User = bdUser
+            });
+            result!.UserGroups.Add(new Data.Entities.UserGroup
+            {
+                User = bdUser2
+            });
 
             await dbContext.SaveChangesAsync();
         }

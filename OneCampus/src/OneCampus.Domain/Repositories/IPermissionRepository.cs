@@ -4,9 +4,9 @@ namespace OneCampus.Domain.Repositories
 {
     public interface IPermissionRepository
     {
-        Task<UserPermissions> AllowPermissionAsync(Guid userID,int groupID,Permissions permission);
+        Task<UserPermissions> AllowPermissionAsync(Guid userID, int groupID, PermissionType permission);
 
-        Task<UserPermissions> DenyPermissionAsync(Guid userID, int groupID, Permissions permission);
+        Task<UserPermissions> DenyPermissionAsync(Guid userID, int groupID, PermissionType permission);
 
         Task<UserPermissions?> GetPermissions(Guid userID, int groupID);
 

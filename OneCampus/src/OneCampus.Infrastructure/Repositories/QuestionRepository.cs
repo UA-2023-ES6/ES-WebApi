@@ -76,7 +76,7 @@ public class QuestionRepository : IQuestionRepository
                 .AsNoTracking()
                 .AnyAsync(item => item.Id == questionId &&
                     item.Group.DeleteDate == null &&
-                    item.Group.Users.Any(item => item.Id == userId));
+                    item.Group.UserGroups.Any(item => item.UserId == userId));
         }
     }
 }

@@ -12,7 +12,7 @@ public class Group
     public DateTime? UpdateDate { get; set; }
     public DateTime? DeleteDate { get; set; }
 
-    public virtual List<User> Users { get; set; } = new();
+    public virtual List<UserGroup> UserGroups { get; set; } = new();
     public virtual List<Event> Events { get; set; } = new();
     public virtual List<Message> Messages { get; set; } = new();
     public virtual List<Group> Groups { get; set; } = new();
