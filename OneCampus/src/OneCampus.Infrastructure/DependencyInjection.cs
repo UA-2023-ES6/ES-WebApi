@@ -23,6 +23,7 @@ public static class DependencyInjection
             .AddScoped<IMessageRepository, MessageRepository>()
             .AddScoped<IInstitutionRepository, InstitutionRepository>()
             .AddScoped<IQuestionRepository, QuestionRepository>()
-            .AddScoped<IAnswerRepository, AnswerRepository>();
+            .AddScoped<IAnswerRepository, AnswerRepository>()
+            .AddScoped<IPermissionRepository,PermissionsRepository>();
     }
 }
