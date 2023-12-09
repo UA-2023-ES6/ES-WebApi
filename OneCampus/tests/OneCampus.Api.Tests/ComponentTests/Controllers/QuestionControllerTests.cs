@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoFixture;
+using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Forums;
@@ -10,18 +12,21 @@ namespace OneCampus.Tests.ComponentTests.Controllers;
 [TestFixture]
 public class QuestionControllerTests
 {
+    private readonly Fixture _fixture = new();
+
     private Mock<IQuestionService> _mockIQuestionService;
 
     private QuestionController _controller;
+
+    private UserInfo _user;
 
     private readonly CreateQuestionRequest request = new CreateQuestionRequest
     {
         Content = "Test Question",
         GroupId = 1,
-        UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87")
     };
 
-    private readonly Question expectedQuestion = new Question(1, 1, "Test Question", new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87"), DateTime.UtcNow);
+    private readonly Question expectedQuestion = new Question(1, 1, "Test Question", "Manel", DateTime.UtcNow);
 
 
     [SetUp]
@@ -29,14 +34,16 @@ public class QuestionControllerTests
     {
         _mockIQuestionService = new Mock<IQuestionService>(MockBehavior.Strict);
 
-        _controller = new QuestionController(_mockIQuestionService.Object);
+        _user = _fixture.Create<UserInfo>();
+
+        _controller = new QuestionController(_mockIQuestionService.Object, _user);
     }
 
     [Test]
     public async Task CreateQuestionAsyncTest()
     {
 
-        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(request.GroupId, request.Content, request.UserId))
+        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(request.GroupId, request.Content, _user.Id))
             .ReturnsAsync(expectedQuestion);
 
         var result = await _controller.CreateQuestionAsync(request);
@@ -55,12 +62,11 @@ public class QuestionControllerTests
     {
         // Arrange
         int validId = 1;  // Assuming 1 is a valid ID for this test
-        Guid UserId = new Guid("b8e7f65a-f6ca-4211-a562-1fb022636e87");
         var expected = new List<Question>
         {
-            new Question(1, 1, "Test Question 1", UserId, DateTime.UtcNow.AddMinutes(-2)),
-            new Question(2, 1, "Test Question 2", UserId, DateTime.UtcNow.AddMinutes(-1)),
-            new Question(3, 1, "Test Question 3", UserId, DateTime.UtcNow)
+            new Question(1, 1, "Test Question 1", "Manel", DateTime.UtcNow.AddMinutes(-2)),
+            new Question(2, 1, "Test Question 2", "Manel", DateTime.UtcNow.AddMinutes(-1)),
+            new Question(3, 1, "Test Question 3", "Manel", DateTime.UtcNow)
         };
 
         _mockIQuestionService.Setup(s => s.FindQuestionsByGroupAsync(validId))

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
 using OneCampus.Domain.Entities.Forums;
@@ -15,11 +16,12 @@ public class AnswerController : ControllerBase
 {
     private readonly IAnswerService _answerService;
 
+    private readonly UserInfo _userInfo;
 
-    public AnswerController(IAnswerService answerService)
+    public AnswerController(IAnswerService answerService, UserInfo userInfo)
     {
         _answerService = answerService.ThrowIfNull().Value;
-
+        _userInfo = userInfo.ThrowIfNull().Value;
     }
 
     [HttpPost()]
@@ -27,7 +29,7 @@ public class AnswerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateAnswerAsync([FromBody] CreateAnswerRequest request)
     {
-        var answer = await _answerService.CreateAnswerAsync(request.QuestionId, request.Content, request.UserId);
+        var answer = await _answerService.CreateAnswerAsync(request.QuestionId, request.Content, _userInfo.Id);
 
         return Ok(new BaseResponse<CreateAnswerRequest, Answer>(request, answer!));
     }

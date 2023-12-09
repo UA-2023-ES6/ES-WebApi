@@ -5,11 +5,11 @@ public sealed record Answer
     public int Id { get; }
     public int QuestionId { get; }
     public string Content { get; }
-    public Guid UserId { get; }
+    public string SenderName { get; }
     public DateTime CreateDate { get; }
 
 
-    public Answer(int id, int questionId, string content, Guid userId, DateTime createDate)
+    public Answer(int id, int questionId, string content, String senderUserName, DateTime createDate)
     {
         Id = id.Throw()
             .IfLessThan(0)
@@ -17,7 +17,7 @@ public sealed record Answer
 
         QuestionId = questionId;
         Content = content;
-        UserId = userId;
+        SenderName = senderUserName;
         CreateDate = createDate;
     }
 }
