@@ -1,23 +1,26 @@
-﻿using OneCampus.Domain.Entities.Permissions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Permissions;
 using Database = OneCampus.Infrastructure.Data.Entities;
 
-namespace OneCampus.Infrastructure.Extensions
-{
-    internal static class PermissionExtentions
-    {
-        internal static UserPermissions? ToUserPermissions(this Database.UserGroupPermissions? userGroupPermissions)
-        {
-            if (userGroupPermissions is null)
-            {
-                return null;
-            }
+namespace OneCampus.Infrastructure.Extensions;
 
-            return new UserPermissions(userGroupPermissions.UserGroup.UserId, userGroupPermissions.UserGroup.GroupId);
+internal static class PermissionExtentions
+{
+    internal static UserPermissions? ToUserPermissions(
+        this IEnumerable<Database.UserGroupPermissions?> userGroupPermissions,
+        Guid userId,
+        int groupId)
+    {
+        if (userGroupPermissions is null)
+        {
+            return null;
         }
+
+        var permissions = userGroupPermissions
+            .Where(item => item is not null)
+            .Select(item => (PermissionType)item.PermissionId)
+            .ToList();
+
+        return new UserPermissions(userId, groupId, permissions);
     }
 }

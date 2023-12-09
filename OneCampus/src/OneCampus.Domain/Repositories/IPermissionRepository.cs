@@ -1,15 +1,14 @@
 ﻿using OneCampus.Domain.Entities.Permissions;
 
-namespace OneCampus.Domain.Repositories
+namespace OneCampus.Domain.Repositories;
+
+public interface IPermissionRepository
 {
-    public interface IPermissionRepository
-    {
-        Task<UserPermissions?> AllowPermissionAsync(Guid userID, int groupID, PermissionType permission);
+    Task<UserPermissions?> AllowPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions);
 
-        Task<UserPermissions?> DenyPermissionAsync(Guid userID, int groupID, PermissionType permission);
+    Task<UserPermissions?> DenyPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions);
 
-        Task<UserPermissions?> GetPermissions(Guid userID, int groupID);
+    Task<UserPermissions?> GetPermissionsAsync(Guid userId, int groupId);
 
-        Task<UserPermissions?> DeleteAsync(Guid userID, int groupID);
-    }
+    Task<bool> UserHasPermissionAsync(Guid userId, int groupId, PermissionType permissionType);
 }

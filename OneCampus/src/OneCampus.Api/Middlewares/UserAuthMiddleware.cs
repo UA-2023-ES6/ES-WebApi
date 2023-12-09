@@ -1,4 +1,4 @@
-using OneCampus.Api.Models;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Services;
 using System.IdentityModel.Tokens.Jwt;
 

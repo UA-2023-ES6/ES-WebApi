@@ -11,9 +11,9 @@ public sealed record UserPermissions
     public UserPermissions(Guid userId, int groupId) : this(userId, groupId, new List<PermissionType>(0))
     { }
 
-    public UserPermissions(Guid userID, int groupId, IList<PermissionType> permissions)
+    public UserPermissions(Guid userId, int groupId, IList<PermissionType> permissions)
     {
-        UserId = userID.Throw().IfDefault().Value;
+        UserId = userId.Throw().IfDefault().Value;
         GroupId = groupId.Throw().IfNegativeOrZero().Value;
         Permissions = permissions.ThrowIfNull().Value;
     }

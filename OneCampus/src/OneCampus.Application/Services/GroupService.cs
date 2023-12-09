@@ -184,8 +184,8 @@ public class GroupService : IGroupService
         groupId.Throw()
             .IfNegativeOrZero();
 
-        var isUserInTheGroup = await _groupRepository.HasAccessAsync(userId, groupId);
-        if (!isUserInTheGroup)
+        var hasAccess = await _groupRepository.HasAccessAsync(userId, groupId);
+        if (!hasAccess)
         {
             throw new ForbiddenException("the user does not have access to the group");
         }

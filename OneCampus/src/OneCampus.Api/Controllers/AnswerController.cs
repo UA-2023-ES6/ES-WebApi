@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Services;
 using System.Net.Mime;
@@ -24,7 +24,7 @@ public class AnswerController : ControllerBase
         _userInfo = userInfo.ThrowIfNull().Value;
     }
 
-    [HttpPost()]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<CreateAnswerRequest, Answer>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateAnswerAsync([FromBody] CreateAnswerRequest request)

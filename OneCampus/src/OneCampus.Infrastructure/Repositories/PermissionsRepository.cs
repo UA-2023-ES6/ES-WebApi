@@ -1,152 +1,116 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging.Abstractions;
 using OneCampus.Domain;
 using OneCampus.Domain.Entities.Permissions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Infrastructure.Data;
 using OneCampus.Infrastructure.Data.Entities;
 using OneCampus.Infrastructure.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Immutable;
 
-namespace OneCampus.Infrastructure.Repositories
+namespace OneCampus.Infrastructure.Repositories;
+
+public class PermissionsRepository : IPermissionRepository
 {
-    public class PermissionsRepository: IPermissionRepository
+    private readonly IDbContextFactory<OneCampusDbContext> _oneCampusDbContextFactory;
+
+    public PermissionsRepository(IDbContextFactory<OneCampusDbContext> oneCampusDbContextFactory)
     {
-        private readonly IDbContextFactory<OneCampusDbContext> _oneCampusDbContextFactory;
+        _oneCampusDbContextFactory = oneCampusDbContextFactory.ThrowIfNull().Value;
+    }
 
-        public PermissionsRepository(IDbContextFactory<OneCampusDbContext> oneCampusDbContextFactory)
+    public async Task<UserPermissions?> AllowPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions)
+    {
+        using (var context = _oneCampusDbContextFactory.CreateDbContext())
         {
-            _oneCampusDbContextFactory = oneCampusDbContextFactory;
-        }
-
-        public async Task<UserPermissions?> AllowPermissionAsync(Guid userID, int groupID, PermissionType permission)
-        {
-            using (var context = _oneCampusDbContextFactory.CreateDbContext()) 
+            var usergroup = await context.UserGroups.FirstOrDefaultAsync(item => item.UserId == userId && item.GroupId == groupId);
+            if (usergroup == null)
             {
-                var user = await context.Users.FindAsync(userID);
-                if(user == null)
+                return null;
+            }
+
+            var currentPermissions  = await GetPermissionsAsync(context, userId, groupId);
+            if (currentPermissions == null)
+            {
+                return null;
+            }
+
+            foreach (var permissionType in permissions)
+            {
+                if (currentPermissions.Permissions.Contains(permissionType))
                 {
-                    return null;
+                    continue;
                 }
 
-                var group = await context.Groups.FindAsync(groupID);
-                if(group == null)
+                var permission = await context.Permissions.FindAsync((int)permissionType);
+                if (permission == null)
                 {
                     return null;
                 }
 
                 var userGroupPermission = new UserGroupPermissions
                 {
-                    UserGroup = new UserGroup
-                    {
-                        User = user,
-                        Group = group
-                    },
-                    Permission = new Permission
-                    {
-                        Name = permission.ToString() // assim??
-                    }
+                    UserGroup = usergroup,
+                    Permission = permission
                 };
 
-                var res = await context.UserGroupPermissions.AddAsync(userGroupPermission);
-                await context.SaveChangesAsync();
-
-                return res.Entity.ToUserPermissions();
+                var result = await context.UserGroupPermissions.AddAsync(userGroupPermission);
             }
+
+            await context.SaveChangesAsync();
+
+            return await GetPermissionsAsync(context, userId, groupId);
         }
+    }
 
-        public async Task<UserPermissions?> DeleteAsync(Guid userID, int groupID)
+    public async Task<UserPermissions?> DenyPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions)
+    {
+        var permissionsIds = permissions.Select(item => (int)item);
+
+        using (var context = _oneCampusDbContextFactory.CreateDbContext())
         {
-            using (var context = _oneCampusDbContextFactory.CreateDbContext())
+            var permissionsToRemove = await context.UserGroupPermissions
+                .Where(item =>
+                    item.UserGroup.GroupId == groupId &&
+                    item.UserGroup.UserId == userId &&
+                    permissionsIds.Contains(item.PermissionId))
+                .ToListAsync();
+            if (permissionsToRemove.Any())
             {
-                var user = await context.Users.FindAsync(userID);
-                if (user == null)
-                {
-                    return null;
-                }
-
-                var group = await context.Groups.FindAsync(groupID);
-                if (group == null)
-                {
-                    return null;
-                }
-
-                var userGroup = await context.UserGroupPermissions.FirstOrDefaultAsync(item => item.UserGroup.UserId == userID && item.UserGroup.GroupId == groupID);
-                if(userGroup == null)
-                {
-                    return null;
-                }
-
-                //deleted date??
-                await context.SaveChangesAsync();
-
-                return userGroup.ToUserPermissions();
-            }
-        }
-
-        public async Task<UserPermissions?> DenyPermissionAsync(Guid userID, int groupID, PermissionType permission)
-        {
-            using (var context = _oneCampusDbContextFactory.CreateDbContext())
-            {
-                var user = await context.Users.FindAsync(userID);
-                if (user == null)
-                {
-                    return null;
-                }
-
-                var group = await context.Groups.FindAsync(groupID);
-                if (group == null)
-                {
-                    return null;
-                }
-
-                var perm = await context.UserGroupPermissions
-                    .FirstOrDefaultAsync(item => item.UserGroup.GroupId == groupID && item.UserGroup.UserId == userID && item.Permission.Name == permission.ToString());
-
-                if(perm == null)
-                {
-                    return null;
-                }
-
-                //delted date??
+                context.UserGroupPermissions.RemoveRange(permissionsToRemove);
 
                 await context.SaveChangesAsync();
-
-                return perm.ToUserPermissions();
             }
-        }
 
-        public async Task<UserPermissions?> GetPermissions(Guid userID, int groupID)
+            return await GetPermissionsAsync(context, userId, groupId);
+        }
+    }
+
+    public async Task<UserPermissions?> GetPermissionsAsync(Guid userId, int groupId)
+    {
+        using (var context = _oneCampusDbContextFactory.CreateDbContext())
         {
-            using (var context = _oneCampusDbContextFactory.CreateDbContext())
-            {
-                var user = await context.Users.FindAsync(userID);
-                if (user == null)
-                {
-                    return null;
-                }
-
-                var group = await context.Groups.FindAsync(groupID);
-                if (group == null)
-                {
-                    return null;
-                }
-
-                var perms = await context.UserGroupPermissions //find all??
-                    .FirstOrDefaultAsync(item => item.UserGroup.GroupId == groupID && item.UserGroup.UserId == userID);
-
-                if (perms == null)
-                {
-                    return null;
-                }
-
-                return perms.ToUserPermissions(); //verificar a extensao porque nao ta a guardar as permissoes, so userid e groupid
-            }
+            return await GetPermissionsAsync(context, userId, groupId);
         }
+    }
+
+    public async Task<bool> UserHasPermissionAsync(Guid userId, int groupId, PermissionType permissionType)
+    {
+        using (var context = _oneCampusDbContextFactory.CreateDbContext())
+        {
+            return await context.UserGroupPermissions
+                .AnyAsync(item =>
+                    item.UserGroup.GroupId == groupId &&
+                    item.UserGroup.UserId == userId &&
+                    item.PermissionId == (int)permissionType);
+        }
+    }
+
+    private async Task<UserPermissions?> GetPermissionsAsync(OneCampusDbContext context, Guid userId, int groupId)
+    {
+        var permissions = await context.UserGroupPermissions
+            .Where(item => item.UserGroup.GroupId == groupId && item.UserGroup.UserId == userId)
+            .ToListAsync();
+
+        return permissions.ToUserPermissions(userId, groupId);
     }
 }
