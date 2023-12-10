@@ -6,6 +6,8 @@ namespace OneCampus.Api.Middlewares;
 
 public class UserAuthMiddleware
 {
+    private const string HealthCheckPath = "/healthz";
+
     private readonly RequestDelegate _next;
 
     public UserAuthMiddleware(RequestDelegate next)
@@ -16,6 +18,13 @@ public class UserAuthMiddleware
     public async Task InvokeAsync(HttpContext context, IUsersService usersService, DebugDataService debugDataService)
     {
         usersService.ThrowIfNull();
+
+        if(IsHealthCheck(context.Request))
+        {
+            await _next(context);
+            
+            return;
+        }
 
         var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
         if (token == null)
@@ -62,5 +71,12 @@ public class UserAuthMiddleware
         userInfo.Email = user.Email;
 
         await _next(context);
+    }
+
+    private bool IsHealthCheck(HttpRequest request)
+    {
+        request.ThrowIfNull();
+
+        return request.Path == HealthCheckPath;
     }
 }
