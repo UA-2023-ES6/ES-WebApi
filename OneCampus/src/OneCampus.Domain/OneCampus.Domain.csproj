@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Throw" Version="1.4.0" />
+  </ItemGroup>
+
+    <ItemGroup>
+        <SonarQubeSetting Include="sonar.coverage.exclusions">
+            <Value>**/DependencyInjection.cs</Value>
+        </SonarQubeSetting>
+        <SonarQubeSetting Include="sonar.exclusions">
+            <Value>**/DependencyInjection.cs</Value>
+        </SonarQubeSetting>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Entities\Messages\" />
+      <None Remove="Entities\Forums\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Entities\Messages\" />
+      <Folder Include="Entities\Forums\" />
+    </ItemGroup>
+</Project>

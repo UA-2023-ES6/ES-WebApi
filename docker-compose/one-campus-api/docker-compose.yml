@@ -1,0 +1,32 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: YAk5ijhHrT
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+
+  api:
+    container_name: onecampus-api
+    image: onecampus-api:latest
+    restart: always
+    environment:
+      ConnectionStrings__OneCampusDb: "server=mysql;port=3306;database=OneCampusDb;uid=root;password=YAk5ijhHrT"
+    ports:
+      - "5000:80"
+      - "5001:443"
+    depends_on:
+      mysql:
+        condition: service_healthy
