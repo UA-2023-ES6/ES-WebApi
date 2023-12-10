@@ -27,6 +27,10 @@ public class ErrorHandlingMiddleware
         {
             await ErrorResponseAsync(context, StatusCodes.Status404NotFound, "Not found", ex.Message);
         }
+        catch (ForbiddenException ex)
+        {
+            await ErrorResponseAsync(context, StatusCodes.Status403Forbidden, "Forbidden", ex.Message);
+        }
         catch (Exception ex)
         {
             await ErrorResponseAsync(context, StatusCodes.Status500InternalServerError, "internal server error", ex.Message);

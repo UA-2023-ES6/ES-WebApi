@@ -17,8 +17,7 @@ public static class DependencyInjection
             .AddScoped<IGroupService, GroupService>()
             .AddScoped<IMessageService, MessageService>()
             .AddScoped<IQuestionService, QuestionService>()
-            .AddSingleton<IUsersService, UsersService>()
+            .AddScoped<IUsersService, UsersService>()
             .AddScoped<IAnswerService, AnswerService>();
-
     }
 }

@@ -8,15 +8,19 @@ public interface IGroupRepository
 
     Task<Group?> UpdateAsync(int id, string name);
 
-    Task<Group?> FindAsync(int id);
+    Task<GroupDetails?> FindAsync(int id);
 
     Task<Group?> FindByInstitutionIdAsync(int institutionId);
 
-    Task<IEnumerable<Group>> GetSubGroupsAsync(int id);
+    Task<IEnumerable<Group>> GetSubGroupsAsync(Guid userId, int id);
 
     Task<Group?> DeleteAsync(int id);
 
-    Task<Group?> AddUserAsync(int groupId, Guid userId);
+    Task<GroupDetails?> AddUserAsync(int groupId, Guid userId);
 
-    Task<Group?> RemoveUserAsync(int groupId, Guid userId);
+    Task<GroupDetails?> RemoveUserAsync(int groupId, Guid userId);
+
+    Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip);
+
+    Task<bool> HasAccessAsync(Guid userId, int groupId);
 }

@@ -53,7 +53,7 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<Group?> FindAsync(int id)
+    public async Task<GroupDetails?> FindAsync(int id)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -62,7 +62,9 @@ public class GroupRepository : IGroupRepository
                 .Include(item => item.Users)
                 .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == id);
 
-            return group.ToGroup();
+            return group is null
+                ? null
+                : group.ToGroupDetais(group.Users.Select(item => item.ToUser()!));
         }
     }
 
@@ -80,13 +82,15 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<IEnumerable<Group>> GetSubGroupsAsync(int id)
+    public async Task<IEnumerable<Group>> GetSubGroupsAsync(Guid userId, int id)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var groups = await context.Groups
                 .AsNoTracking()
-                .Where(item => item.DeleteDate == null && item.ParentId == id)
+                .Where(item => item.DeleteDate == null &&
+                    item.ParentId == id &&
+                    item.Users.Any(item => item.Id == userId))
                 .ToListAsync();
 
             return groups.Select(group => group.ToGroup()!);
@@ -118,7 +122,7 @@ public class GroupRepository : IGroupRepository
         }
     }
 
-    public async Task<Group?> AddUserAsync(int groupId, Guid userId)
+    public async Task<GroupDetails?> AddUserAsync(int groupId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -138,11 +142,11 @@ public class GroupRepository : IGroupRepository
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroup(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
         }
     }
 
-    public async Task<Group?> RemoveUserAsync(int groupId, Guid userId)
+    public async Task<GroupDetails?> RemoveUserAsync(int groupId, Guid userId)
     {
         using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
@@ -162,7 +166,42 @@ public class GroupRepository : IGroupRepository
                 await context.SaveChangesAsync();
             }
 
-            return group.ToGroup(group.Users.Select(item => item.ToUser()!))!;
+            return group.ToGroupDetais(group.Users.Select(item => item.ToUser()!))!;
+        }
+    }
+
+    public async Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(int id, int take, int skip)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            var query = context.Users.Where(item => item.DeleteDate == null && item.Groups.Any(item => item.Id == id));
+
+            var totalResults = await query.CountAsync();
+            if (totalResults == 0)
+            {
+                return (Enumerable.Empty<User>(), 0);
+            }
+
+            var users = await query
+                .OrderBy(item => item.Username)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            return (users.Select(item => item.ToUser()!), totalResults);
+        }
+    }
+
+    public async Task<bool> HasAccessAsync(Guid userId, int groupId)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            return await context.Groups
+                .AsNoTracking()
+                .Include(item => item.Users)
+                .AnyAsync(item => item.DeleteDate == null &&
+                    item.Id == groupId &&
+                    item.Users.Any(item => item.Id == userId));
         }
     }
 }

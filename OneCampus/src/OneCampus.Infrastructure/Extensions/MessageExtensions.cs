@@ -13,5 +13,4 @@ internal static class MessageExtensions
 
         return new Message(message.Id, message.GroupId, message.Content, senderUserName, message.CreateDate);
     }
-
 }

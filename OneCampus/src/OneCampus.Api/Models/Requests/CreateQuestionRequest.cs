@@ -6,4 +6,3 @@ public class CreateQuestionRequest
 
     public int GroupId { get; set; }
 }
-

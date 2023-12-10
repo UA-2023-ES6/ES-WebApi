@@ -21,14 +21,13 @@ public class QuestionService : IQuestionService
         _groupRepository = groupRepository.ThrowIfNull().Value;
     }
 
-    public async Task<Question?> CreateQuestionAsync(int groupId, string content, Guid userId)
+    public async Task<Question?> CreateQuestionAsync(Guid userId, int groupId, string content)
     {
+        await ValidateGroupAccessAsync(userId, groupId);
+
         content.Throw()
             .IfEmpty()
             .IfWhiteSpace();
-
-        groupId.Throw()
-            .IfNegativeOrZero();
 
         var user = await _userRepository.FindAsync(userId);
         if (user is null)
@@ -45,10 +44,9 @@ public class QuestionService : IQuestionService
         return await _questionRepository.CreateAsync(content, groupId, userId);
     }
 
-    public async Task<IEnumerable<Question>> FindQuestionsByGroupAsync(int groupId)
+    public async Task<IEnumerable<Question>> FindQuestionsByGroupAsync(Guid userId, int groupId)
     {
-        groupId.Throw()
-            .IfNegativeOrZero();
+        await ValidateGroupAccessAsync(userId, groupId);
 
         var group = await _groupRepository.FindAsync(groupId);
         if (group is null)
@@ -57,5 +55,20 @@ public class QuestionService : IQuestionService
         }
 
         return await _questionRepository.GetQuestionsByGroupAsync(groupId);
+    }
+
+    private async Task ValidateGroupAccessAsync(Guid userId, int groupId)
+    {
+        userId.Throw()
+            .IfDefault();
+
+        groupId.Throw()
+            .IfNegativeOrZero();
+
+        var isUserInTheGroup = await _groupRepository.HasAccessAsync(userId, groupId);
+        if (!isUserInTheGroup)
+        {
+            throw new ForbiddenException("the user does not have access to the group");
+        }
     }
 }

@@ -22,7 +22,6 @@ public class QuestionController : ControllerBase
     {
         _questionService = questionService.ThrowIfNull().Value;
         _userInfo = userInfo.ThrowIfNull().Value;
-
     }
 
     [HttpPost()]
@@ -30,7 +29,7 @@ public class QuestionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateQuestionAsync([FromBody] CreateQuestionRequest request)
     {
-        var question = await _questionService.CreateQuestionAsync(request.GroupId, request.Content, _userInfo.Id);
+        var question = await _questionService.CreateQuestionAsync(_userInfo.Id, request.GroupId, request.Content);
 
         return Ok(new BaseResponse<CreateQuestionRequest, Question>(request, question!));
     }
@@ -41,7 +40,7 @@ public class QuestionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> FindGroupAsync([FromRoute] int groupId)
     {
-        var questions = await _questionService.FindQuestionsByGroupAsync(groupId);
+        var questions = await _questionService.FindQuestionsByGroupAsync(_userInfo.Id, groupId);
 
         var request = new QuestionsByGroupRequest
         {
@@ -51,4 +50,3 @@ public class QuestionController : ControllerBase
         return Ok(new EnumerableResponse<QuestionsByGroupRequest, Question>(request, questions, questions.Count()));
     }
 }
-

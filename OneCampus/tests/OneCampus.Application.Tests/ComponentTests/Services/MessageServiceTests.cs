@@ -35,7 +35,7 @@ public class MessageServiceTests
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockMessageRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Message>());
@@ -52,7 +52,7 @@ public class MessageServiceTests
             .ReturnsAsync((Domain.Entities.Users.User?)null);
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockMessageRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Message>());
@@ -69,7 +69,7 @@ public class MessageServiceTests
             .ReturnsAsync(Fixture.Create<Domain.Entities.Users.User>());
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Domain.Entities.Groups.Group?)null);
+            .ReturnsAsync((Domain.Entities.Groups.GroupDetails?)null);
 
         _mockMessageRepository.Setup(item => item.CreateAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<Message>());
@@ -91,7 +91,7 @@ public class MessageServiceTests
             .ToList();
 
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.Group>());
+            .ReturnsAsync(Fixture.Create<Domain.Entities.Groups.GroupDetails>());
 
         _mockMessageRepository.Setup(item => item.GetMessagesByGroupAsync(It.IsAny<int>()))
             .ReturnsAsync(messages);
@@ -106,7 +106,7 @@ public class MessageServiceTests
     public async Task FindMessagesByGroupAsync_WithNullGroup_ThrowsNotFoundException()
     {
         _mockGroupRepository.Setup(item => item.FindAsync(It.IsAny<int>()))
-            .ReturnsAsync((Domain.Entities.Groups.Group?)null);
+            .ReturnsAsync((Domain.Entities.Groups.GroupDetails?)null);
 
         await _service.Invoking(s => s.FindMessagesByGroupAsync(1))
             .Should().ThrowAsync<NotFoundException>()
@@ -114,8 +114,4 @@ public class MessageServiceTests
     }
 
     #endregion
-
-
 }
-
-

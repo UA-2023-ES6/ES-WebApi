@@ -29,7 +29,7 @@ public class AnswerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateAnswerAsync([FromBody] CreateAnswerRequest request)
     {
-        var answer = await _answerService.CreateAnswerAsync(request.QuestionId, request.Content, _userInfo.Id);
+        var answer = await _answerService.CreateAnswerAsync(_userInfo.Id, request.QuestionId, request.Content);
 
         return Ok(new BaseResponse<CreateAnswerRequest, Answer>(request, answer!));
     }
@@ -40,7 +40,7 @@ public class AnswerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> FindAnswersAsync([FromRoute] int questionId)
     {
-        var answers = await _answerService.FindAnswersByQuestionAsync(questionId);
+        var answers = await _answerService.FindAnswersByQuestionAsync(_userInfo.Id, questionId);
 
         var request = new AnswersByQuestionRequest
         {
@@ -50,4 +50,3 @@ public class AnswerController : ControllerBase
         return Ok(new EnumerableResponse<AnswersByQuestionRequest, Answer>(request, answers, answers.Count()));
     }
 }
-

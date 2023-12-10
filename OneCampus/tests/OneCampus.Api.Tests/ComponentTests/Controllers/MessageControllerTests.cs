@@ -26,7 +26,6 @@ public class MessageControllerTests
 
     private readonly Message expectedMessage = new Message(1, 1, "Test Message", "User 1", DateTime.UtcNow);
 
-
     [SetUp]
     public void Setup()
     {
@@ -40,7 +39,6 @@ public class MessageControllerTests
     [Test]
     public async Task CreateMessageAsyncTest()
     {
-
         _mockIMessageService.Setup(s => s.CreateMessageAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<Guid>()))
             .ReturnsAsync(expectedMessage);
 
@@ -88,6 +86,4 @@ public class MessageControllerTests
         response!.Request.GroupId.Should().Be(validId);
         response.Data.Should().BeEquivalentTo(expected);
     }
-
 }
-

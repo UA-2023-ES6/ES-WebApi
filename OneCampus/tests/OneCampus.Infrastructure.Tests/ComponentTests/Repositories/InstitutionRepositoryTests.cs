@@ -11,6 +11,8 @@ public class InstitutionRepositoryTests
 
     private InstitutionRepository _institutionRepository;
 
+    private IDbContextFactory<OneCampusDbContext> _dbContextFactory => _mockDbContextFactory.Object;
+
     [SetUp]
     public void SetUp()
     {
@@ -22,8 +24,8 @@ public class InstitutionRepositoryTests
         _connection.Open();
 
         var options = new DbContextOptionsBuilder<OneCampusDbContext>()
-        .UseSqlite(_connection)
-        .Options;
+            .UseSqlite(_connection)
+            .Options;
         using (var dbContext = new OneCampusDbContext(options))
         {
             dbContext.Database.EnsureCreated();
@@ -51,14 +53,16 @@ public class InstitutionRepositoryTests
             .Without(item => item.DeleteDate)
             .Create();
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Institutions.AddAsync(dbInstitution);
-
             await dbContext.SaveChangesAsync();
 
             dbInstitution = result.Entity;
         }
+
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
 
         var institution = await _institutionRepository.FindAsync(dbInstitution.Id);
 
@@ -74,14 +78,16 @@ public class InstitutionRepositoryTests
             .With(item => item.DeleteDate)
             .Create();
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
             var result = await dbContext.Institutions.AddAsync(dbInstitution);
-
             await dbContext.SaveChangesAsync();
 
             dbInstitution = result.Entity;
         }
+
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
+        await GroupHelper.AddUsersToGroupAsync(_dbContextFactory, dbInstitution.GroupId, user.Id);
 
         var institution = await _institutionRepository.FindAsync(dbInstitution.Id);
 
@@ -95,29 +101,29 @@ public class InstitutionRepositoryTests
     [Test]
     public async Task GetAsync_WithDeletedInstitution_ReturnsNull()
     {
-        var dbInstitution = GetMockedInstitution()
-            .Without(item => item.DeleteDate)
-            .Create();
+        var user = await UserHelper.AddUserAsync(_dbContextFactory);
 
-        using (var dbContext = await _mockDbContextFactory.Object.CreateDbContextAsync())
+        using (var dbContext = await _dbContextFactory.CreateDbContextAsync())
         {
-            await dbContext.Institutions.AddAsync(GetMockedInstitution()
+            var bdUser = await dbContext.Users.FindAsync(user.Id)!;
+
+            await dbContext.Institutions.AddAsync(GetMockedInstitution(bdUser!)
                 .Without(item => item.DeleteDate)
                 .Create());
 
-            await dbContext.Institutions.AddAsync(GetMockedInstitution()
+            await dbContext.Institutions.AddAsync(GetMockedInstitution(bdUser!)
                 .Without(item => item.DeleteDate)
                 .Create());
 
             // Deleted Institution
-            await dbContext.Institutions.AddAsync(GetMockedInstitution()
+            await dbContext.Institutions.AddAsync(GetMockedInstitution(bdUser!)
                 .With(item => item.DeleteDate)
                 .Create());
 
             await dbContext.SaveChangesAsync();
         }
 
-        var institutions = await _institutionRepository.GetAsync();
+        var institutions = await _institutionRepository.GetAsync(user.Id);
 
         institutions.Should().NotBeNullOrEmpty()
             .And.HaveCount(2);
@@ -127,11 +133,12 @@ public class InstitutionRepositoryTests
 
     #region Private Methods
 
-    private IPostprocessComposer<Database.Institution> GetMockedInstitution()
+    private IPostprocessComposer<Database.Institution> GetMockedInstitution(Database.User? user = null)
     {
         var dbInstitutionGroup = _fixture.Build<Database.Group>()
             .Without(item => item.Id)
             .Without(item => item.ParentId)
+            .With(item => item.Users, user is null ? null : new List<Database.User> { user })
             .Create();
 
         return _fixture.Build<Database.Institution>()

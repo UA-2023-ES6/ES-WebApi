@@ -28,7 +28,6 @@ public class QuestionControllerTests
 
     private readonly Question expectedQuestion = new Question(1, 1, "Test Question", "Manel", DateTime.UtcNow);
 
-
     [SetUp]
     public void Setup()
     {
@@ -42,8 +41,7 @@ public class QuestionControllerTests
     [Test]
     public async Task CreateQuestionAsyncTest()
     {
-
-        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(request.GroupId, request.Content, _user.Id))
+        _mockIQuestionService.Setup(s => s.CreateQuestionAsync(_user.Id, request.GroupId, request.Content))
             .ReturnsAsync(expectedQuestion);
 
         var result = await _controller.CreateQuestionAsync(request);
@@ -69,7 +67,7 @@ public class QuestionControllerTests
             new Question(3, 1, "Test Question 3", "Manel", DateTime.UtcNow)
         };
 
-        _mockIQuestionService.Setup(s => s.FindQuestionsByGroupAsync(validId))
+        _mockIQuestionService.Setup(s => s.FindQuestionsByGroupAsync(_user.Id, validId))
             .ReturnsAsync(expected);
 
         // Act
@@ -90,6 +88,4 @@ public class QuestionControllerTests
         response!.Request.GroupId.Should().Be(validId);
         response.Data.Should().BeEquivalentTo(expected);
     }
-
 }
-

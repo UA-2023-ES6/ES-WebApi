@@ -67,4 +67,16 @@ public class QuestionRepository : IQuestionRepository
             return question?.ToQuestion(question.User.Username);
         }
     }
+
+    public async Task<bool> HasAccessAsync(Guid userId, int questionId)
+    {
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
+        {
+            return await context.Questions
+                .AsNoTracking()
+                .AnyAsync(item => item.Id == questionId &&
+                    item.Group.DeleteDate == null &&
+                    item.Group.Users.Any(item => item.Id == userId));
+        }
+    }
 }

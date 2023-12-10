@@ -15,5 +15,4 @@ public class Message
 
     public virtual User User { get; set; } = null!;
     public virtual Group Group { get; set; } = null!;
-
 }
