@@ -1,6 +1,7 @@
 using OneCampus;
 using OneCampus.Api;
 using OneCampus.Api.Middlewares;
+using OneCampus.Api.Monitoring;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddServices(builder.Configuration);
+
+builder.Services.AddHealthChecks()
+    .AddCheck<HealthCheck>(nameof(HealthCheck));
 
 // Only for debug data
 builder.Services.AddScoped<DebugDataService>();
@@ -34,6 +38,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/healthz");
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<UserAuthMiddleware>();
