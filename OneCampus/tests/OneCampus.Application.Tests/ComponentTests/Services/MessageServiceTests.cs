@@ -1,7 +1,9 @@
 ﻿using OneCampus.Application.Services;
+using OneCampus.Domain;
 using OneCampus.Domain.Entities.Messages;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
+using OneCampus.Domain.Services;
 
 namespace OneCampus.Application.Tests.ComponentTests.Services;
 
@@ -13,6 +15,7 @@ public class MessageServiceTests
     private Mock<IMessageRepository> _mockMessageRepository;
     private Mock<IUserRepository> _mockUserRepository;
     private Mock<IGroupRepository> _mockGroupRepository;
+    private Mock<IPermissionService> _mockPermissionService;
 
     private MessageService _service;
 
@@ -22,8 +25,16 @@ public class MessageServiceTests
         _mockMessageRepository = new Mock<IMessageRepository>(MockBehavior.Strict);
         _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
         _mockGroupRepository = new Mock<IGroupRepository>(MockBehavior.Strict);
+        _mockPermissionService = new Mock<IPermissionService>(MockBehavior.Strict);
 
-        _service = new MessageService(_mockMessageRepository.Object, _mockUserRepository.Object, _mockGroupRepository.Object);
+        _service = new MessageService(
+            _mockMessageRepository.Object,
+            _mockUserRepository.Object, 
+            _mockGroupRepository.Object,
+            _mockPermissionService.Object);
+
+        _mockPermissionService.Setup(item => item.ValidatePermissionAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<PermissionType>()))
+            .Returns(Task.CompletedTask);
     }
 
     #region CreateMessageAsync

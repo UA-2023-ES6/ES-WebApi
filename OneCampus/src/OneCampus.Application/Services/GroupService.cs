@@ -1,4 +1,5 @@
-﻿using OneCampus.Domain.Entities.Groups;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Domain.Services;
@@ -10,15 +11,18 @@ public class GroupService : IGroupService
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
     private readonly IInstitutionRepository _institutionRepository;
+    private readonly IPermissionService _permissionService;
 
     public GroupService(
         IGroupRepository groupRepository,
         IUserRepository userRepository,
-        IInstitutionRepository institutionRepository)
+        IInstitutionRepository institutionRepository,
+        IPermissionService permissionService)
     {
         _groupRepository = groupRepository.ThrowIfNull().Value;
         _userRepository = userRepository.ThrowIfNull().Value;
         _institutionRepository = institutionRepository.ThrowIfNull().Value;
+        _permissionService = permissionService.ThrowIfNull().Value;
     }
 
     public async Task<Group> CreateGroupAsync(Guid userId, string name, int parentGroupId)
@@ -27,6 +31,7 @@ public class GroupService : IGroupService
             .IfEmpty()
             .IfWhiteSpace();
 
+        await _permissionService.ValidatePermissionAsync(userId, parentGroupId, PermissionType.CreateSubGroup);
         await ValidateGroupAccessAsync(userId, parentGroupId);
 
         var group = await _groupRepository.CreateAsync(name, parentGroupId);
@@ -42,6 +47,7 @@ public class GroupService : IGroupService
             .IfEmpty()
             .IfWhiteSpace();
 
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.CreateSubGroup);
         await ValidateGroupAccessAsync(userId, id);
 
         var group = await _groupRepository.UpdateAsync(id, name);
@@ -89,6 +95,7 @@ public class GroupService : IGroupService
 
     public async Task<Group?> DeleteGroupAsync(Guid userId, int id)
     {
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.DeleteGroup);
         await ValidateGroupAccessAsync(userId, id);
 
         return await _groupRepository.DeleteAsync(id);
@@ -96,6 +103,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDetails> AddUserAsync(Guid userId, int groupId, Guid userIdToAdd)
     {
+        await _permissionService.ValidatePermissionAsync(userId, groupId, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, groupId);
 
         userIdToAdd.Throw()
@@ -129,6 +137,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDetails> RemoveUserAsync(Guid userId, int groupId, Guid userIdToRemove)
     {
+        await _permissionService.ValidatePermissionAsync(userId, groupId, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, groupId);
 
         userIdToRemove.Throw()
@@ -145,6 +154,7 @@ public class GroupService : IGroupService
 
     private async Task<Group> GetGroupWithSubGroupsAsync(Guid userId, Group group)
     {
+        ;
         var subGroups = await _groupRepository.GetSubGroupsAsync(userId, group.Id);
 
         foreach (var subGroup in subGroups)
@@ -159,6 +169,7 @@ public class GroupService : IGroupService
 
     public async Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(Guid userId, int id, int take, int skip)
     {
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, id);
 
         take.Throw()

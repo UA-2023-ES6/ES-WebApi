@@ -33,6 +33,7 @@ public class PermissionService : IPermissionService
         userId.Throw().IfDefault();
         groupId.Throw().IfNegativeOrZero();
 
+        await ValidatePermissionAsync(_userInfo.Id, groupId, PermissionType.ManageUsersPermission);
         await ValidateGroupAccessAsync(groupId);
 
         if (userId == _userInfo.Id)
@@ -66,6 +67,7 @@ public class PermissionService : IPermissionService
         userId.Throw().IfDefault();
         groupId.Throw().IfNegativeOrZero();
 
+        await ValidatePermissionAsync(_userInfo.Id, groupId, PermissionType.ManageUsersPermission);
         await ValidateGroupAccessAsync(groupId);
 
         if (userId == _userInfo.Id)
@@ -98,6 +100,7 @@ public class PermissionService : IPermissionService
     {
         groupId.Throw().IfNegativeOrZero();
 
+        await ValidatePermissionAsync(_userInfo.Id, groupId, PermissionType.ManageUsersPermission);
         await ValidateGroupAccessAsync(groupId);
 
         var group = await _groupRepository.FindAsync(groupId);
@@ -141,6 +144,17 @@ public class PermissionService : IPermissionService
         }
 
         return permissions;
+    }
+
+    public async Task ValidatePermissionAsync(Guid userId, int groupId, PermissionType type)
+    {
+        userId.Throw().IfDefault();
+
+        var hasPermission = await _permissionRepository.UserHasPermissionAsync(_userInfo.Id, groupId, type);
+        if (!hasPermission)
+        {
+            throw new ForbiddenException("the user does not have the permission: " + type);
+        }
     }
 
     private async Task ValidateGroupAccessAsync(int groupId)

@@ -1,7 +1,9 @@
 ﻿using OneCampus.Application.Services;
+using OneCampus.Domain;
 using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
+using OneCampus.Domain.Services;
 
 namespace OneCampus.Application.Tests.ComponentTests.Services;
 
@@ -13,6 +15,7 @@ public class AnswerServiceTests
     private Mock<IAnswerRepository> _mockAnswerRepository;
     private Mock<IUserRepository> _mockUserRepository;
     private Mock<IQuestionRepository> _mockQuestionRepository;
+    private Mock<IPermissionService> _mockPermissionService;
 
     private AnswerService _service;
 
@@ -22,11 +25,19 @@ public class AnswerServiceTests
         _mockAnswerRepository = new Mock<IAnswerRepository>(MockBehavior.Strict);
         _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
         _mockQuestionRepository = new Mock<IQuestionRepository>(MockBehavior.Strict);
+        _mockPermissionService = new Mock<IPermissionService>(MockBehavior.Strict);
 
-        _service = new AnswerService(_mockAnswerRepository.Object, _mockUserRepository.Object, _mockQuestionRepository.Object);
+        _service = new AnswerService(
+            _mockAnswerRepository.Object,
+            _mockUserRepository.Object,
+            _mockQuestionRepository.Object,
+            _mockPermissionService.Object);
 
         _mockQuestionRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(true);
+
+        _mockPermissionService.Setup(item => item.ValidatePermissionAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<PermissionType>()))
+            .Returns(Task.CompletedTask);
     }
 
     #region CreateAnswerAsync

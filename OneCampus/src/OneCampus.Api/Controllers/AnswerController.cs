@@ -35,7 +35,7 @@ public class AnswerController : ControllerBase
     }
 
     [HttpGet("question/{questionId}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<MessagesByGroupRequest, Answer>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<AnswersByQuestionRequest, Answer>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> FindAnswersAsync([FromRoute] int questionId)

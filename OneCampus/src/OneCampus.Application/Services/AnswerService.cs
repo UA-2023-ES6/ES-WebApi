@@ -1,4 +1,5 @@
-﻿using OneCampus.Domain.Entities.Forums;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Domain.Services;
@@ -10,19 +11,22 @@ public class AnswerService : IAnswerService
     private readonly IAnswerRepository _AnswerRepository;
     private readonly IUserRepository _userRepository;
     private readonly IQuestionRepository _questionRepository;
+    private readonly IPermissionService _permissionService;
 
     public AnswerService(
         IAnswerRepository AnswerRepository,
         IUserRepository userRepository,
-        IQuestionRepository questionRepository)
+        IQuestionRepository questionRepository,
+        IPermissionService permissionService)
     {
         _AnswerRepository = AnswerRepository.ThrowIfNull().Value;
         _userRepository = userRepository.ThrowIfNull().Value;
         _questionRepository = questionRepository.ThrowIfNull().Value;
+        _permissionService = permissionService.ThrowIfNull().Value;
     }
 
     public async Task<Answer?> CreateAnswerAsync(Guid userId, int questionId, string content)
-    {
+    {        
         await ValidateQuestionAccessAsync(userId, questionId);
 
         content.Throw()
@@ -44,6 +48,8 @@ public class AnswerService : IAnswerService
             throw new NotFoundException("question not found");
         }
 
+        await _permissionService.ValidatePermissionAsync(userId, question.GroupId, PermissionType.CreateAnswer);
+
         return await _AnswerRepository.CreateAsync(content, questionId, userId);
     }
 
@@ -63,15 +69,15 @@ public class AnswerService : IAnswerService
         return await _AnswerRepository.GetAnswersByQuestionAsync(questionId);
     }
 
-    private async Task ValidateQuestionAccessAsync(Guid userId, int groupId)
+    private async Task ValidateQuestionAccessAsync(Guid userId, int questionId)
     {
         userId.Throw()
             .IfDefault();
 
-        groupId.Throw()
+        questionId.Throw()
             .IfNegativeOrZero();
 
-        var userHasAccess = await _questionRepository.HasAccessAsync(userId, groupId);
+        var userHasAccess = await _questionRepository.HasAccessAsync(userId, questionId);
         if (!userHasAccess)
         {
             throw new ForbiddenException("the user does not have access to the question");

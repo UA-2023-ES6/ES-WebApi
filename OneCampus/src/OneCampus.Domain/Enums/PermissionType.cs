@@ -3,11 +3,10 @@
 public enum PermissionType
 {
     CreateSubGroup = 1,
-    InviteUser = 2,
-    WriteMessage = 3,
-    WriteQuestion = 4,
-    WriteQuestionResponse = 5,
-    AddEvents = 6,
-    ManageUsers = 7,
-    ManageUsersPermission = 8
+    CreateMessage = 2,
+    CreateQuestion = 3,
+    CreateAnswer = 4,
+    ManageUsers = 5,
+    ManageUsersPermission = 6,
+    DeleteGroup = 7
 }

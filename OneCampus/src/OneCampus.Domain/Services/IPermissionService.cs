@@ -11,4 +11,6 @@ public interface IPermissionService
     Task<UserPermissions> GetPermissionsAsync(int groupId);
 
     Task<UserPermissions> GetPermissionsAsync(Guid userId, int groupId);
+
+    Task ValidatePermissionAsync(Guid userId, int groupId, PermissionType type);
 }
