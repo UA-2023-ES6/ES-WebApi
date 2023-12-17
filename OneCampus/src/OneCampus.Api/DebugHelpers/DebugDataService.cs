@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneCampus.Domain;
+using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Services;
 using OneCampus.Infrastructure.Data;
 using Database = OneCampus.Infrastructure.Data.Entities;
@@ -10,22 +11,21 @@ public class DebugDataService
 {
     public static readonly Guid RootUser = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
-    private const int DefaultInstitutionId = 1;    
+    private const int DefaultInstitutionId = 1;
 
     private readonly IDbContextFactory<OneCampusDbContext> _dbContextFactory;
-    private readonly IUsersService _usersService;
-    private readonly IGroupService _groupService;
+    private readonly Lazy<IUsersService> _lazyUsersService;
+
+    private IUsersService _usersService => _lazyUsersService.Value;
 
     private static int DefaultInstitutionGroupId = 0;
 
     public DebugDataService(
         IDbContextFactory<OneCampusDbContext> dbContextFactory,
-        IUsersService usersService,
-        IGroupService groupService)
+        Lazy<IUsersService> lazyUsersService)
     {
         _dbContextFactory = dbContextFactory;
-        _usersService = usersService;
-        _groupService = groupService;
+        _lazyUsersService = lazyUsersService;
     }
 
     internal async Task CreateDefaultDataAsync()
@@ -38,21 +38,21 @@ public class DebugDataService
         await AddAllPermissionsToUser(RootUser, DefaultInstitutionGroupId);
 
         var user = await AddUserAsync(Guid.Parse("00000000-0000-0000-0000-000000000002"), "User 2", "user2@OneCampus.pt");
-        await _groupService.AddUserAsync(RootUser, DefaultInstitutionGroupId, user.Id);
+        await AddUserToGroupAsync(DefaultInstitutionGroupId, user.Id);
         await AddAllPermissionsToUser(user.Id, DefaultInstitutionGroupId);
 
         user = await AddUserAsync(Guid.Parse("00000000-0000-0000-0000-000000000003"), "User 3", "user3@OneCampus.pt");
-        await _groupService.AddUserAsync(RootUser, DefaultInstitutionGroupId, user.Id);
+        await AddUserToGroupAsync(DefaultInstitutionGroupId, user.Id);
         await AddAllPermissionsToUser(user.Id, DefaultInstitutionGroupId);
 
         user = await AddUserAsync(Guid.Parse("00000000-0000-0000-0000-000000000004"), "User 4", "user4@OneCampus.pt");
-        await _groupService.AddUserAsync(RootUser, DefaultInstitutionGroupId, user.Id);
+        await AddUserToGroupAsync(DefaultInstitutionGroupId, user.Id);
         await AddAllPermissionsToUser(user.Id, DefaultInstitutionGroupId);
     }
 
     internal async Task AddUserToDefaultInstitution(Guid userId)
     {
-        await _groupService.AddUserAsync(RootUser, DefaultInstitutionGroupId, userId);
+        await AddUserToGroupAsync(DefaultInstitutionGroupId, userId);
         await AddAllPermissionsToUser(userId, DefaultInstitutionGroupId);
     }
 
@@ -112,6 +112,39 @@ public class DebugDataService
         }
 
         return await _usersService.CreateAsync(id, username, email);
+    }
+
+    internal async Task AddUserToGroupAsync(int groupId, Guid userId)
+    {
+        using (var context = await _dbContextFactory.CreateDbContextAsync())
+        {
+            var group = await context.Groups
+                .Include(item => item.UserGroups)
+                .FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == groupId);
+            if (group == null)
+            {
+                throw new NotFoundException($"goup with id {groupId} not found");
+            }
+
+            if (group.UserGroups.Any(item => item.UserId == userId))
+            {
+                return;
+            }
+
+            var newUser = await context.Users.FirstOrDefaultAsync(item => item.DeleteDate == null && item.Id == userId);
+            if (newUser is not null)
+            {
+                var userGroup = new Database.UserGroup
+                {
+                    Group = group,
+                    User = newUser
+                };
+
+                group.UserGroups.Add(userGroup);
+
+                await context.SaveChangesAsync();
+            }
+        }
     }
 
     internal async Task AddPermissions()

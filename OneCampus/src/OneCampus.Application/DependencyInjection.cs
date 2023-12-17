@@ -13,12 +13,21 @@ public static class DependencyInjection
         services.ThrowIfNull();
 
         return services
-            .AddScoped<IDateTimeProvider, DateTimeProvider>()
-            .AddScoped<IGroupService, GroupService>()
-            .AddScoped<IMessageService, MessageService>()
-            .AddScoped<IQuestionService, QuestionService>()
-            .AddScoped<IUsersService, UsersService>()
-            .AddScoped<IAnswerService, AnswerService>()
-            .AddScoped<IPermissionService, PermissionService>();
+            .AddServiceAndLazyInitialization<IUsersService, UsersService>()
+            .AddTransient<IGroupService, GroupService>()
+            .AddTransient<IDateTimeProvider, DateTimeProvider>()
+            .AddTransient<IMessageService, MessageService>()
+            .AddTransient<IQuestionService, QuestionService>()            
+            .AddTransient<IAnswerService, AnswerService>()
+            .AddTransient<IPermissionService, PermissionService>();
+    }
+
+    private static IServiceCollection AddServiceAndLazyInitialization<TService, TImplementation>(this IServiceCollection services)
+        where TService : class
+        where TImplementation : class, TService
+    {
+        return services
+            .AddTransient<TService, TImplementation>()
+            .AddTransient(provider => new Lazy<TService>(() => provider.GetRequiredService<TService>()));
     }
 }

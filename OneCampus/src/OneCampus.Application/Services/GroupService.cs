@@ -11,17 +11,20 @@ public class GroupService : IGroupService
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
     private readonly IInstitutionRepository _institutionRepository;
+    private readonly IPermissionRepository _permissionRepository;
     private readonly IPermissionService _permissionService;
 
     public GroupService(
         IGroupRepository groupRepository,
         IUserRepository userRepository,
         IInstitutionRepository institutionRepository,
+        IPermissionRepository permissionRepository,
         IPermissionService permissionService)
     {
         _groupRepository = groupRepository.ThrowIfNull().Value;
         _userRepository = userRepository.ThrowIfNull().Value;
         _institutionRepository = institutionRepository.ThrowIfNull().Value;
+        _permissionRepository = permissionRepository.ThrowIfNull().Value;
         _permissionService = permissionService.ThrowIfNull().Value;
     }
 
@@ -37,6 +40,7 @@ public class GroupService : IGroupService
         var group = await _groupRepository.CreateAsync(name, parentGroupId);
 
         await _groupRepository.AddUserAsync(group.Id, userId);
+        await _permissionRepository.AllowPermissionsAsync(userId, group.Id, Enum.GetValues<PermissionType>());
 
         return group;
     }
