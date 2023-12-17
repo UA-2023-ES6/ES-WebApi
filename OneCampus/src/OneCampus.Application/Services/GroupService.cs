@@ -158,7 +158,6 @@ public class GroupService : IGroupService
 
     private async Task<Group> GetGroupWithSubGroupsAsync(Guid userId, Group group)
     {
-        ;
         var subGroups = await _groupRepository.GetSubGroupsAsync(userId, group.Id);
 
         foreach (var subGroup in subGroups)

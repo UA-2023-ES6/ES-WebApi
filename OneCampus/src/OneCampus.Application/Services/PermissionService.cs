@@ -96,7 +96,7 @@ public class PermissionService : IPermissionService
         return result;
     }
 
-    public async Task<UserPermissions> GetPermissionsAsync(int groupId)
+    public async Task<UserPermissions> GetMyPermissionsAsync(int groupId)
     {
         groupId.Throw().IfNegativeOrZero();
 

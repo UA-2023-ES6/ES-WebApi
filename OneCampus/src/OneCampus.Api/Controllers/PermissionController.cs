@@ -71,7 +71,7 @@ namespace OneCampus.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult> GetPermissionsAsync([FromRoute] int groupId)
         {
-            var permissions = await _permissionService.GetPermissionsAsync(groupId);
+            var permissions = await _permissionService.GetMyPermissionsAsync(groupId);
 
             var responseRequest = new MePermissionsRequest
             {

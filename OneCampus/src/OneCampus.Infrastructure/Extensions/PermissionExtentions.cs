@@ -18,7 +18,7 @@ internal static class PermissionExtentions
 
         var permissions = userGroupPermissions
             .Where(item => item is not null)
-            .Select(item => (PermissionType)item.PermissionId)
+            .Select(item => (PermissionType)item!.PermissionId)
             .ToList();
 
         return new UserPermissions(userId, groupId, permissions);

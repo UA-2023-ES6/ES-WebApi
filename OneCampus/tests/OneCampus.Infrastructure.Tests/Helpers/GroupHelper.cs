@@ -84,7 +84,7 @@ public static class GroupHelper
 
                 group.UserGroups.Add(new Data.Entities.UserGroup
                 {
-                    User = user,
+                    User = user!,
                     Group = group
                 });
             }

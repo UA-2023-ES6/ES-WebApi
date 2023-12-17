@@ -8,7 +8,7 @@ public interface IPermissionService
 
     Task<UserPermissions> DenyPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions);
 
-    Task<UserPermissions> GetPermissionsAsync(int groupId);
+    Task<UserPermissions> GetMyPermissionsAsync(int groupId);
 
     Task<UserPermissions> GetPermissionsAsync(Guid userId, int groupId);
 

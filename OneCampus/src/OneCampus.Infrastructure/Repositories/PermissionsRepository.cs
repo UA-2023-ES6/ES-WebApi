@@ -20,7 +20,7 @@ public class PermissionsRepository : IPermissionRepository
 
     public async Task<UserPermissions?> AllowPermissionsAsync(Guid userId, int groupId, IList<PermissionType> permissions)
     {
-        using (var context = _oneCampusDbContextFactory.CreateDbContext())
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var usergroup = await context.UserGroups.FirstOrDefaultAsync(item => item.UserId == userId && item.GroupId == groupId);
             if (usergroup == null)
@@ -53,7 +53,7 @@ public class PermissionsRepository : IPermissionRepository
                     Permission = permission
                 };
 
-                var result = await context.UserGroupPermissions.AddAsync(userGroupPermission);
+                await context.UserGroupPermissions.AddAsync(userGroupPermission);
             }
 
             await context.SaveChangesAsync();
@@ -66,7 +66,7 @@ public class PermissionsRepository : IPermissionRepository
     {
         var permissionsIds = permissions.Select(item => (int)item);
 
-        using (var context = _oneCampusDbContextFactory.CreateDbContext())
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             var permissionsToRemove = await context.UserGroupPermissions
                 .Where(item =>
@@ -87,7 +87,7 @@ public class PermissionsRepository : IPermissionRepository
 
     public async Task<UserPermissions?> GetPermissionsAsync(Guid userId, int groupId)
     {
-        using (var context = _oneCampusDbContextFactory.CreateDbContext())
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             return await GetPermissionsAsync(context, userId, groupId);
         }
@@ -95,7 +95,7 @@ public class PermissionsRepository : IPermissionRepository
 
     public async Task<bool> UserHasPermissionAsync(Guid userId, int groupId, PermissionType permissionType)
     {
-        using (var context = _oneCampusDbContextFactory.CreateDbContext())
+        using (var context = await _oneCampusDbContextFactory.CreateDbContextAsync())
         {
             return await context.UserGroupPermissions
                 .AnyAsync(item =>
@@ -105,7 +105,7 @@ public class PermissionsRepository : IPermissionRepository
         }
     }
 
-    private async Task<UserPermissions?> GetPermissionsAsync(OneCampusDbContext context, Guid userId, int groupId)
+    private static async Task<UserPermissions?> GetPermissionsAsync(OneCampusDbContext context, Guid userId, int groupId)
     {
         var permissions = await context.UserGroupPermissions
             .Where(item => item.UserGroup.GroupId == groupId && item.UserGroup.UserId == userId)
