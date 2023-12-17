@@ -8,8 +8,9 @@ namespace OneCampus.Api;
 
 public class DebugDataService
 {
-    private const int DefaultInstitutionId = 1;
-    private readonly Guid RootUser = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    public static readonly Guid RootUser = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+    private const int DefaultInstitutionId = 1;    
 
     private readonly IDbContextFactory<OneCampusDbContext> _dbContextFactory;
     private readonly IUsersService _usersService;
