@@ -1,5 +1,5 @@
-﻿using OneCampus.Api.Models;
-using OneCampus.Application;
+﻿using OneCampus.Application;
+using OneCampus.Domain.Entities;
 using OneCampus.Infrastructure;
 
 namespace OneCampus;

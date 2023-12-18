@@ -18,11 +18,12 @@ public static class DependencyInjection
 
         return services
             .AddDbContextFactory<OneCampusDbContext>(options => options.UseMySQL(bdConnectionString))
-            .AddScoped<IGroupRepository, GroupRepository>()
-            .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IMessageRepository, MessageRepository>()
-            .AddScoped<IInstitutionRepository, InstitutionRepository>()
-            .AddScoped<IQuestionRepository, QuestionRepository>()
-            .AddScoped<IAnswerRepository, AnswerRepository>();
+            .AddTransient<IGroupRepository, GroupRepository>()
+            .AddTransient<IUserRepository, UserRepository>()
+            .AddTransient<IMessageRepository, MessageRepository>()
+            .AddTransient<IInstitutionRepository, InstitutionRepository>()
+            .AddTransient<IQuestionRepository, QuestionRepository>()
+            .AddTransient<IAnswerRepository, AnswerRepository>()
+            .AddTransient<IPermissionRepository, PermissionsRepository>();
     }
 }

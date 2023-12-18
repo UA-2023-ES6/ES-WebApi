@@ -1,4 +1,5 @@
-﻿using OneCampus.Domain.Entities.Forums;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Domain.Services;
@@ -10,19 +11,23 @@ public class QuestionService : IQuestionService
     private readonly IQuestionRepository _questionRepository;
     private readonly IUserRepository _userRepository;
     private readonly IGroupRepository _groupRepository;
+    private readonly IPermissionService _permissionService;
 
     public QuestionService(
         IQuestionRepository questionRepository,
         IUserRepository userRepository,
-        IGroupRepository groupRepository)
+        IGroupRepository groupRepository,
+        IPermissionService permissionService)
     {
         _questionRepository = questionRepository.ThrowIfNull().Value;
         _userRepository = userRepository.ThrowIfNull().Value;
         _groupRepository = groupRepository.ThrowIfNull().Value;
+        _permissionService = permissionService.ThrowIfNull().Value;
     }
 
     public async Task<Question?> CreateQuestionAsync(Guid userId, int groupId, string content)
     {
+        await _permissionService.ValidatePermissionAsync(userId, groupId, PermissionType.CreateQuestion);
         await ValidateGroupAccessAsync(userId, groupId);
 
         content.Throw()

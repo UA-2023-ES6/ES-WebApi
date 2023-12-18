@@ -1,7 +1,10 @@
 ﻿using OneCampus.Application.Services;
+using OneCampus.Domain;
 using OneCampus.Domain.Entities.Groups;
+using OneCampus.Domain.Entities.Permissions;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
+using OneCampus.Domain.Services;
 
 namespace OneCampus.Application.Tests.ComponentTests.Services;
 
@@ -13,6 +16,8 @@ public class GroupServiceTests
     private Mock<IGroupRepository> _mockGroupRepository;
     private Mock<IUserRepository> _mockUserRepository;
     private Mock<IInstitutionRepository> _mockInstitutionRepository;
+    private Mock<IPermissionRepository> _mockPermissionRepository;
+    private Mock<IPermissionService> _mockPermissionService;
 
     private GroupService _service;
 
@@ -22,11 +27,21 @@ public class GroupServiceTests
         _mockGroupRepository = new Mock<IGroupRepository>(MockBehavior.Strict);
         _mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
         _mockInstitutionRepository = new Mock<IInstitutionRepository>(MockBehavior.Strict);
+        _mockPermissionRepository = new Mock<IPermissionRepository>(MockBehavior.Strict);
+        _mockPermissionService = new Mock<IPermissionService>(MockBehavior.Strict);
 
-        _service = new GroupService(_mockGroupRepository.Object, _mockUserRepository.Object, _mockInstitutionRepository.Object);
+        _service = new GroupService(
+            _mockGroupRepository.Object,
+            _mockUserRepository.Object,
+            _mockInstitutionRepository.Object,
+            _mockPermissionRepository.Object,
+            _mockPermissionService.Object);
 
         _mockGroupRepository.Setup(item => item.HasAccessAsync(It.IsAny<Guid>(), It.IsAny<int>()))
             .ReturnsAsync(true);
+
+        _mockPermissionService.Setup(item => item.ValidatePermissionAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<PermissionType>()))
+            .Returns(Task.CompletedTask);
     }
 
     #region CreateGroupAsync
@@ -42,6 +57,9 @@ public class GroupServiceTests
 
         _mockGroupRepository.Setup(item => item.AddUserAsync(It.IsAny<int>(), It.IsAny<Guid>()))
             .ReturnsAsync(Fixture.Create<GroupDetails>());
+
+        _mockPermissionRepository.Setup(item => item.AllowPermissionsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<IList<PermissionType>>()))
+    .ReturnsAsync(Fixture.Create<UserPermissions>());
 
         var result = await _service.CreateGroupAsync(Guid.NewGuid(), "name", 1);
 

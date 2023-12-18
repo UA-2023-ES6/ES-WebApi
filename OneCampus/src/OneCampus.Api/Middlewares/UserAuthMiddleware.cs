@@ -1,4 +1,4 @@
-using OneCampus.Api.Models;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Services;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -52,12 +52,12 @@ public class UserAuthMiddleware
             throw new ArgumentException("invalid id");
         }
 
+        var addUserToDefaultInstitution = false;
         var user = await usersService.FindAsync(guid);
         if (user == null)
         {
             user = await usersService.CreateAsync(guid, username, email);
-
-            await debugDataService.AddUserToDefaultInstitution(guid);
+            addUserToDefaultInstitution = true;
         }
 
         if (user.Username != username || user.Email != email)
@@ -69,6 +69,11 @@ public class UserAuthMiddleware
         userInfo.Id = user.Id;
         userInfo.UserName = user.Username;
         userInfo.Email = user.Email;
+
+        if (addUserToDefaultInstitution)
+        {
+            await debugDataService.AddUserToDefaultInstitution(guid);
+        }
 
         await _next(context);
     }

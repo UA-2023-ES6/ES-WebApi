@@ -75,14 +75,18 @@ public static class GroupHelper
         using (var dbContext = await dbContextFactory.CreateDbContextAsync())
         {
             var group = await dbContext.Groups
-                .Include(item => item.Users)
+                .Include(item => item.UserGroups)
                 .FirstAsync(item => item.Id == groupId);
 
             foreach (var userId in usersIds)
             {
                 var user = await dbContext.Users.FindAsync(userId);
 
-                group.Users.Add(user!);
+                group.UserGroups.Add(new Data.Entities.UserGroup
+                {
+                    User = user!,
+                    Group = group
+                });
             }
 
             await dbContext.SaveChangesAsync();

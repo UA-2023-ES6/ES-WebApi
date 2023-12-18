@@ -2,6 +2,7 @@ using OneCampus;
 using OneCampus.Api;
 using OneCampus.Api.Middlewares;
 using OneCampus.Api.Monitoring;
+using OneCampus.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,9 @@ app.UseMiddleware<UserAuthMiddleware>();
 // Add mock data
 using (var scope = app.Services.CreateScope())
 {
+    var user = scope.ServiceProvider.GetRequiredService<UserInfo>();
+    user.Id = DebugDataService.RootUser;
+
     var debugDataService = scope.ServiceProvider.GetRequiredService<DebugDataService>();
     await debugDataService.CreateDefaultDataAsync();
 }

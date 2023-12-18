@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Services;
 using System.Net.Mime;
@@ -24,7 +24,7 @@ public class AnswerController : ControllerBase
         _userInfo = userInfo.ThrowIfNull().Value;
     }
 
-    [HttpPost()]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseResponse<CreateAnswerRequest, Answer>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateAnswerAsync([FromBody] CreateAnswerRequest request)
@@ -35,7 +35,7 @@ public class AnswerController : ControllerBase
     }
 
     [HttpGet("question/{questionId}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<MessagesByGroupRequest, Answer>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnumerableResponse<AnswersByQuestionRequest, Answer>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> FindAnswersAsync([FromRoute] int questionId)

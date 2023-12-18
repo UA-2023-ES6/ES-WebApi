@@ -32,7 +32,7 @@ public class InstitutionRepository : IInstitutionRepository
         {
             var institutions = await context.Institutions
                 .AsNoTracking()
-                .Where(item => item.DeleteDate == null && item.Group.Users.Any(item => item.Id == userId))
+                .Where(item => item.DeleteDate == null && item.Group.UserGroups.Any(item => item.UserId == userId))
                 .ToListAsync();
 
             return institutions.Select(item => item.ToInstitution()!);

@@ -1,4 +1,5 @@
-﻿using OneCampus.Domain.Entities.Groups;
+﻿using OneCampus.Domain;
+using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Exceptions;
 using OneCampus.Domain.Repositories;
 using OneCampus.Domain.Services;
@@ -10,15 +11,21 @@ public class GroupService : IGroupService
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
     private readonly IInstitutionRepository _institutionRepository;
+    private readonly IPermissionRepository _permissionRepository;
+    private readonly IPermissionService _permissionService;
 
     public GroupService(
         IGroupRepository groupRepository,
         IUserRepository userRepository,
-        IInstitutionRepository institutionRepository)
+        IInstitutionRepository institutionRepository,
+        IPermissionRepository permissionRepository,
+        IPermissionService permissionService)
     {
         _groupRepository = groupRepository.ThrowIfNull().Value;
         _userRepository = userRepository.ThrowIfNull().Value;
         _institutionRepository = institutionRepository.ThrowIfNull().Value;
+        _permissionRepository = permissionRepository.ThrowIfNull().Value;
+        _permissionService = permissionService.ThrowIfNull().Value;
     }
 
     public async Task<Group> CreateGroupAsync(Guid userId, string name, int parentGroupId)
@@ -27,11 +34,13 @@ public class GroupService : IGroupService
             .IfEmpty()
             .IfWhiteSpace();
 
+        await _permissionService.ValidatePermissionAsync(userId, parentGroupId, PermissionType.CreateSubGroup);
         await ValidateGroupAccessAsync(userId, parentGroupId);
 
         var group = await _groupRepository.CreateAsync(name, parentGroupId);
 
         await _groupRepository.AddUserAsync(group.Id, userId);
+        await _permissionRepository.AllowPermissionsAsync(userId, group.Id, Enum.GetValues<PermissionType>());
 
         return group;
     }
@@ -42,6 +51,7 @@ public class GroupService : IGroupService
             .IfEmpty()
             .IfWhiteSpace();
 
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.CreateSubGroup);
         await ValidateGroupAccessAsync(userId, id);
 
         var group = await _groupRepository.UpdateAsync(id, name);
@@ -89,6 +99,7 @@ public class GroupService : IGroupService
 
     public async Task<Group?> DeleteGroupAsync(Guid userId, int id)
     {
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.DeleteGroup);
         await ValidateGroupAccessAsync(userId, id);
 
         return await _groupRepository.DeleteAsync(id);
@@ -96,6 +107,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDetails> AddUserAsync(Guid userId, int groupId, Guid userIdToAdd)
     {
+        await _permissionService.ValidatePermissionAsync(userId, groupId, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, groupId);
 
         userIdToAdd.Throw()
@@ -129,6 +141,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDetails> RemoveUserAsync(Guid userId, int groupId, Guid userIdToRemove)
     {
+        await _permissionService.ValidatePermissionAsync(userId, groupId, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, groupId);
 
         userIdToRemove.Throw()
@@ -159,6 +172,7 @@ public class GroupService : IGroupService
 
     public async Task<(IEnumerable<User> Results, int TotalResults)> GetUsersAsync(Guid userId, int id, int take, int skip)
     {
+        await _permissionService.ValidatePermissionAsync(userId, id, PermissionType.ManageUsers);
         await ValidateGroupAccessAsync(userId, id);
 
         take.Throw()
@@ -184,8 +198,8 @@ public class GroupService : IGroupService
         groupId.Throw()
             .IfNegativeOrZero();
 
-        var isUserInTheGroup = await _groupRepository.HasAccessAsync(userId, groupId);
-        if (!isUserInTheGroup)
+        var hasAccess = await _groupRepository.HasAccessAsync(userId, groupId);
+        if (!hasAccess)
         {
             throw new ForbiddenException("the user does not have access to the group");
         }

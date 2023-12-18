@@ -7,8 +7,9 @@ public class OneCampusDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Institution> Institutions { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<UserRoleInstitution> UserRoleInstitution { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<UserGroupPermissions> UserGroupPermissions { get; set; }
+    public DbSet<UserGroup> UserGroups { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<Event> Events { get; set; }
     public DbSet<Message> Messages { get; set; }

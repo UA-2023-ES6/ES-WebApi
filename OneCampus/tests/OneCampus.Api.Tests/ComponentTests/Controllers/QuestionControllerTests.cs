@@ -1,9 +1,9 @@
 ﻿using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
 using OneCampus.Api.Controllers;
-using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests;
 using OneCampus.Api.Models.Responses;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Entities.Forums;
 using OneCampus.Domain.Services;
 

@@ -15,5 +15,4 @@ public class Institution
     public int GroupId { get; set; }
 
     public virtual Group Group { get; set; } = null!;
-    public virtual List<UserRoleInstitution> UserRoleInstitution { get; set; } = new();
 }

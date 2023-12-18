@@ -13,6 +13,5 @@ public class User
     public DateTime? UpdateDate { get; set; }
     public DateTime? DeleteDate { get; set; }
 
-    public virtual List<UserRoleInstitution> UserRoleInstitution { get; set; } = new();
-    public virtual List<Group> Groups { get; set; } = new();
+    public virtual List<UserGroup> UserGroups { get; set; } = new();
 }

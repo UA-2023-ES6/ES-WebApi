@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCampus.Api.Models;
 using OneCampus.Api.Models.Requests.Groups;
 using OneCampus.Api.Models.Responses;
+using OneCampus.Domain.Entities;
 using OneCampus.Domain.Entities.Groups;
 using OneCampus.Domain.Services;
 using System.Net.Mime;

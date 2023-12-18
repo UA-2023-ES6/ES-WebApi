@@ -1,4 +1,4 @@
-﻿namespace OneCampus.Api.Models;
+﻿namespace OneCampus.Domain.Entities;
 
 public class UserInfo
 {
